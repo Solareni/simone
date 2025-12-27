@@ -43,6 +43,14 @@
   margin-bottom: 0.5em;
 }
 
+.rich-text-content ul {
+  list-style-type: disc;
+}
+
+.rich-text-content ol {
+  list-style-type: decimal;
+}
+
 .rich-text-content li {
   margin-bottom: 0.25em;
 }

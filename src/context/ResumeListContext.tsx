@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import type { ResumeData, ResumeListItem } from '../types/resume';
 import { initialResumeData } from '../data/initialResume';
 
@@ -36,10 +36,10 @@ export function ResumeListProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // 保存简历列表到 localStorage
-  const saveResumeList = (list: ResumeListItem[]) => {
+  const saveResumeList = useCallback((list: ResumeListItem[]) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
     setResumes(list);
-  };
+  }, []);
 
   // 创建新简历
   const createResume = (title?: string): string => {
@@ -101,7 +101,7 @@ export function ResumeListProvider({ children }: { children: ReactNode }) {
   };
 
   // 保存简历数据
-  const saveResumeData = (id: string, data: ResumeData) => {
+  const saveResumeData = useCallback((id: string, data: ResumeData) => {
     const now = new Date().toISOString();
     const updatedData = {
       ...data,
@@ -113,22 +113,25 @@ export function ResumeListProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(RESUME_DATA_PREFIX + id, JSON.stringify(updatedData));
 
     // 更新简历列表中的标题和预览
-    const newList = resumes.map(r => {
-      if (r.id === id) {
-        return {
-          ...r,
-          title: data.title,
-          updatedAt: now,
-          preview: {
-            name: data.basicInfo.name,
-            position: data.jobIntention.position,
-          },
-        };
-      }
-      return r;
+    setResumes(prevResumes => {
+      const newList = prevResumes.map(r => {
+        if (r.id === id) {
+          return {
+            ...r,
+            title: data.title,
+            updatedAt: now,
+            preview: {
+              name: data.basicInfo.name,
+              position: data.jobIntention.position,
+            },
+          };
+        }
+        return r;
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newList));
+      return newList;
     });
-    saveResumeList(newList);
-  };
+  }, []);
 
   return (
     <ResumeListContext.Provider

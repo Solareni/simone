@@ -164,29 +164,44 @@ export function downloadMarkdown(markdown: string, filename: string = 'resume.md
 }
 
 export async function exportToPDF(filename: string = 'resume.pdf') {
-  // 获取简历预览的DOM元素
-  const element = document.querySelector('.max-w-\\[210mm\\]');
+  // 获取简历预览的DOM元素 - 使用data属性选择器更可靠
+  const element = document.querySelector('[data-resume-content]') as HTMLElement;
 
   if (!element) {
+    console.error('未找到简历预览内容');
     alert('未找到简历预览内容，请稍后重试');
     return;
   }
 
+  // 保存原始样式
+  const originalBoxShadow = element.style.boxShadow;
+  const originalBorderRadius = element.style.borderRadius;
+
+  // 临时移除装饰性样式，使PDF更简洁
+  element.style.boxShadow = 'none';
+  element.style.borderRadius = '0';
+
   // 配置PDF选项
   const opt = {
-    margin: [10, 10, 10, 10], // 上右下左边距（毫米）
+    margin: [12, 12, 12, 12], // 上右下左边距（毫米），与预览padding匹配
     filename: filename,
     image: { type: 'jpeg', quality: 0.98 },
     html2canvas: {
-      scale: 2, // 提高清晰度
+      scale: 3, // 提高清晰度
       useCORS: true, // 支持跨域图片
       letterRendering: true,
-      logging: false
+      logging: false,
+      backgroundColor: null, // 保留透明背景，使用元素自身的背景色
+      scrollY: -window.scrollY,
+      scrollX: -window.scrollX,
+      windowWidth: element.scrollWidth,
+      windowHeight: element.scrollHeight
     },
     jsPDF: {
       unit: 'mm',
       format: 'a4',
-      orientation: 'portrait' // 纵向
+      orientation: 'portrait', // 纵向
+      compress: true
     },
     pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
   };
@@ -197,5 +212,9 @@ export async function exportToPDF(filename: string = 'resume.pdf') {
   } catch (error) {
     console.error('PDF导出失败:', error);
     alert('PDF导出失败，请重试');
+  } finally {
+    // 恢复原始样式
+    element.style.boxShadow = originalBoxShadow;
+    element.style.borderRadius = originalBorderRadius;
   }
 }

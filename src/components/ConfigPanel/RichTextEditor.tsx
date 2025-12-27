@@ -1,6 +1,10 @@
 import { useRef, useEffect } from 'react';
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
+import MarkdownShortcuts from 'quill-markdown-shortcuts';
+
+// 注册 Markdown 快捷键模块
+Quill.register('modules/markdownShortcuts', MarkdownShortcuts);
 
 interface RichTextEditorProps {
   value: string;
@@ -22,7 +26,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
     const editorElement = editorRef.current;
     if (!editorElement || quillRef.current) return;
 
-    // 初始化 Quill 实例（只初始化一次）
+    // 初始化 Quill 实例(只初始化一次)
     const quill = new Quill(editorElement, {
       theme: 'snow',
       placeholder: placeholder || '描述职责和成就...',
@@ -35,6 +39,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
           ['link'],
           ['clean']
         ],
+        markdownShortcuts: {},
       },
       formats: [
         'header',
