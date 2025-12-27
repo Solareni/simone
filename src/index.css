@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+/* 隐藏滚动条但保留功能 */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* 打印样式优化 */
+@media print {
+  body {
+    background: white;
+  }
+
+  .lg\:h-screen {
+    height: auto;
+  }
+
+  .lg\:overflow-y-auto {
+    overflow: visible;
+  }
+
+  /* 隐藏左侧配置面板 */
+  .lg\:w-1\/2:first-child {
+    display: none;
+  }
+
+  /* 右侧预览占满整个页面 */
+  .lg\:w-1\/2:last-child {
+    width: 100%;
+  }
+
+  /* A4纸张优化 */
+  .max-w-\[210mm\] {
+    max-width: 100%;
+    box-shadow: none;
+  }
+}
+
+/* 富文本内容样式 */
+.rich-text-content {
+  line-height: 1.6;
+}
+
+.rich-text-content h1,
+.rich-text-content h2,
+.rich-text-content h3 {
+  font-weight: 600;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.rich-text-content h1 {
+  font-size: 1.5em;
+}
+
+.rich-text-content h2 {
+  font-size: 1.25em;
+}
+
+.rich-text-content h3 {
+  font-size: 1.125em;
+}
+
+.rich-text-content ul,
+.rich-text-content ol {
+  margin-left: 1.5em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.rich-text-content li {
+  margin-bottom: 0.25em;
+}
+
+.rich-text-content p {
+  margin-bottom: 0.5em;
+}
+
+.rich-text-content strong {
+  font-weight: 600;
+}
+
+.rich-text-content em {
+  font-style: italic;
+}
+
+.rich-text-content a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.rich-text-content a:hover {
+  color: #1d4ed8;
+}
