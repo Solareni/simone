@@ -4,7 +4,7 @@ import { resumeStyles } from '../../types/styles';
 import { transformResumeDataToDocument } from '../../transformers/documentTransformer';
 import { DocumentRenderer } from '../../renderers/htmlRenderer';
 import StyleSwitcher from './StyleSwitcher';
-import { exportToMarkdown, downloadMarkdown, exportToPDF, exportToPNG, exportPDFHTML } from '../../utils/export';
+import { exportToPDF, exportToPNG } from '../../utils/export';
 import { useRef, useEffect, useState, useMemo } from 'react';
 import type { ResumeDocument } from '../../types/document';
 
@@ -50,22 +50,12 @@ export default function PreviewPanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataKey]); // 使用序列化的dataKey而不是data对象
 
-  const handleExportMarkdown = () => {
-    const markdown = exportToMarkdown(data);
-    const filename = `${data.title || '简历'}.md`;
-    downloadMarkdown(markdown, filename);
-  };
-
   const handleExportPDF = async () => {
-    await exportToPDF(data);
+    await exportToPDF(data, currentStyle);
   };
 
   const handleExportPNG = async () => {
-    await exportToPNG(data);
-  };
-
-  const handleExportPDFHTML = () => {
-    exportPDFHTML(data);
+    await exportToPNG(data, currentStyle);
   };
 
   // 检查是否有任何内容
@@ -80,10 +70,8 @@ export default function PreviewPanel() {
       {/* 顶部工具栏 */}
       <div className="flex justify-end mb-4">
         <StyleSwitcher
-          onExportMarkdown={handleExportMarkdown}
           onExportPDF={handleExportPDF}
           onExportPNG={handleExportPNG}
-          onExportPDFHTML={handleExportPDFHTML}
         />
       </div>
 
