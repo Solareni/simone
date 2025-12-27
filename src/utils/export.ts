@@ -114,11 +114,13 @@ export function exportToMarkdown(data: ResumeData): string {
     sections.education.forEach(item => {
       markdown += `### ${item.title}\n\n`;
       if (item.subtitle) markdown += `**${item.subtitle}**\n\n`;
-      if (item.location || item.dateRange) {
+      if (item.location || item.startDate) {
         markdown += '**';
         if (item.location) markdown += item.location;
-        if (item.location && item.dateRange) markdown += ' · ';
-        if (item.dateRange) markdown += item.dateRange;
+        if (item.location && item.startDate) markdown += ' · ';
+        if (item.startDate) {
+          markdown += `${item.startDate} - ${item.isCurrent ? '至今' : item.endDate || ''}`;
+        }
         markdown += '**\n\n';
       }
       if (item.description) {

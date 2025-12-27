@@ -37,6 +37,14 @@ export default function SectionItemEditor({ sectionType, item, onSave, onCancel 
         });
       }
 
+      if (sectionType === 'education') {
+        Object.assign(defaultItem, {
+          startDate: '',
+          endDate: '',
+          isCurrent: false,
+        });
+      }
+
       setFormData(defaultItem);
     }
   }, [item, sectionType]);
@@ -61,6 +69,16 @@ export default function SectionItemEditor({ sectionType, item, onSave, onCancel 
       // 教育经历的 title 是学校名称，subtitle 是专业
       dataToSave.title = formData.title || '';
       dataToSave.subtitle = formData.subtitle || '';
+      // 设置 dateRange 用于兼容性
+      if (formData.startDate) {
+        const startDate = new Date(formData.startDate + '-01').toLocaleDateString('zh-CN', { year: 'numeric', month: 'numeric' });
+        const endDate = formData.isCurrent
+          ? '至今'
+          : formData.endDate
+            ? new Date(formData.endDate + '-01').toLocaleDateString('zh-CN', { year: 'numeric', month: 'numeric' })
+            : '';
+        dataToSave.dateRange = `${startDate} - ${endDate}`;
+      }
     }
 
     onSave(dataToSave);
@@ -210,14 +228,40 @@ export default function SectionItemEditor({ sectionType, item, onSave, onCancel 
           />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">时间范围</label>
-          <input
-            type="text"
-            value={formData.dateRange || ''}
-            onChange={(e) => setFormData({ ...formData, dateRange: e.target.value })}
-            placeholder="例如: 2016/09 - 2020/06"
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900"
-          />
+          <label className="block text-sm font-semibold text-gray-700 mb-2">入学与毕业时间</label>
+          <div className="flex gap-2 items-end">
+            <div className="flex-1">
+              <input
+                type="month"
+                value={formData.startDate || ''}
+                onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                placeholder="入学时间"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900"
+              />
+            </div>
+            <span className="px-2 text-gray-500 mb-3">至</span>
+            <div className="flex-1">
+              <input
+                type="month"
+                value={formData.endDate || ''}
+                onChange={(e) => setFormData({ ...formData, endDate: e.target.value, isCurrent: false })}
+                placeholder="毕业时间"
+                disabled={formData.isCurrent}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              />
+            </div>
+          </div>
+          <div className="mt-2">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.isCurrent || false}
+                onChange={(e) => setFormData({ ...formData, isCurrent: e.target.checked, endDate: e.target.checked ? undefined : formData.endDate })}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">在读</span>
+            </label>
+          </div>
         </div>
       </div>
 

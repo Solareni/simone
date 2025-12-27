@@ -89,42 +89,24 @@ export default function SectionEditor({ sectionType, title, description, id }: S
                 onCancel={handleCancel}
               />
             ) : (
-              // 显示模式
-              <div>
-                {sectionType === 'work' ? (
-                  <>
-                    <h3 className="font-semibold text-gray-800 mb-1">
-                      {item.companyName || item.title} {item.positionName && `- ${item.positionName}`}
+              // 显示模式 - 简化为一行
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  {sectionType === 'work' ? (
+                    <h3 className="font-semibold text-gray-800 truncate">
+                      {item.companyName || item.title || '未命名公司'}
                     </h3>
-                    <p className="text-sm text-gray-500 mb-2">
-                      {item.location && <span>{item.location} · </span>}
-                      {item.startDate && (
-                        <span>
-                          {new Date(item.startDate + '-01').toLocaleDateString('zh-CN', { year: 'numeric', month: 'numeric' })} - 
-                          {item.isCurrent ? ' 至今' : item.endDate ? new Date(item.endDate + '-01').toLocaleDateString('zh-CN', { year: 'numeric', month: 'numeric' }) : ''}
-                        </span>
-                      )}
-                      {!item.startDate && item.dateRange && <span>{item.dateRange}</span>}
-                    </p>
-                    {item.description && (
-                      <div 
-                        className="text-sm text-gray-700 rich-text-content"
-                        dangerouslySetInnerHTML={{ __html: item.description }}
-                      />
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <h3 className="font-semibold text-gray-800 mb-1">{item.title}</h3>
-                    {item.subtitle && <p className="text-sm text-gray-600 mb-1">{item.subtitle}</p>}
-                    <p className="text-sm text-gray-500 mb-2">
-                      {item.location && <span>{item.location} </span>}
-                      {item.dateRange}
-                    </p>
-                    {item.description && <p className="text-sm text-gray-700">{item.description}</p>}
-                  </>
-                )}
-                <div className="flex gap-3 mt-4">
+                  ) : sectionType === 'education' ? (
+                    <h3 className="font-semibold text-gray-800 truncate">
+                      {item.title || '未命名学校'}
+                    </h3>
+                  ) : (
+                    <h3 className="font-semibold text-gray-800 truncate">
+                      {item.title || '未命名技能'}
+                    </h3>
+                  )}
+                </div>
+                <div className="flex gap-2 flex-shrink-0">
                   <button
                     onClick={() => handleEdit(item)}
                     className="px-4 py-2 text-sm bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all shadow-sm hover:shadow-md font-medium"

@@ -47,9 +47,9 @@ export default function SectionPreview({ title, items, sectionType }: SectionPre
                       : item.title}
                   </h3>
                   <span className="text-sm" style={{ color: style.colors.secondary }}>
-                    {sectionType === 'work' && item.startDate ? (
+                    {(sectionType === 'work' || sectionType === 'education') && item.startDate ? (
                       <>
-                        {new Date(item.startDate + '-01').toLocaleDateString('zh-CN', { year: 'numeric', month: 'numeric' })} - 
+                        {new Date(item.startDate + '-01').toLocaleDateString('zh-CN', { year: 'numeric', month: 'numeric' })} -
                         {item.isCurrent ? ' 至今' : item.endDate ? new Date(item.endDate + '-01').toLocaleDateString('zh-CN', { year: 'numeric', month: 'numeric' }) : ''}
                       </>
                     ) : item.dateRange}

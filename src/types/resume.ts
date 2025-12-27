@@ -20,7 +20,7 @@ export interface SectionItem {
   location?: string;
   dateRange: string;
   description?: string;
-  // 工作经历专用字段
+  // 工作经历和教育经历使用的日期字段
   companyName?: string;
   positionName?: string;
   startDate?: string;
