@@ -1,12 +1,12 @@
 import { useResume } from '../../context/ResumeContext';
 import { useStyle } from '../../context/StyleContext';
 import { resumeStyles } from '../../types/styles';
-import BasicInfoPreview from './BasicInfoPreview';
-import JobIntentionPreview from './JobIntentionPreview';
-import SectionPreview, { HobbiesPreview, CustomLinksPreview } from './SectionPreview';
+import { transformResumeDataToDocument } from '../../transformers/documentTransformer';
+import { DocumentRenderer } from '../../renderers/htmlRenderer';
 import StyleSwitcher from './StyleSwitcher';
 import { exportToMarkdown, downloadMarkdown, exportToPDF } from '../../utils/export';
 import { useRef, useEffect, useState, useMemo } from 'react';
+import type { ResumeDocument } from '../../types/document';
 
 export default function PreviewPanel() {
   const { data } = useResume();
@@ -21,6 +21,9 @@ export default function PreviewPanel() {
 
   // 使用序列化的data作为稳定的依赖项，避免无限循环
   const dataKey = useMemo(() => JSON.stringify(data), [data]);
+
+  // 转换为文档模型（使用useMemo避免重复转换）
+  const document = useMemo(() => transformResumeDataToDocument(data), [data]);
 
   useEffect(() => {
     // 动态计算页面分隔线位置
@@ -54,9 +57,15 @@ export default function PreviewPanel() {
   };
 
   const handleExportPDF = async () => {
-    const filename = `${data.title || '简历'}.pdf`;
-    await exportToPDF(filename);
+    await exportToPDF(data);
   };
+
+  // 检查是否有任何内容
+  const hasContent =
+    data.basicInfo.name !== '' ||
+    data.sections.work.length > 0 ||
+    data.sections.education.length > 0 ||
+    data.sections.skills.length > 0;
 
   return (
     <div className="flex flex-col h-full">
@@ -101,44 +110,19 @@ export default function PreviewPanel() {
               backgroundColor: style.colors.background
             }}
           >
-          {/* 基本信息 */}
-          <BasicInfoPreview />
+            {/* 使用文档模型渲染器 */}
+            <DocumentRenderer
+              document={document}
+              options={{
+                style: currentStyle,
+                includeAvatar: true,
+                showIcons: false,
+                dateFormat: 'YYYY-MM'
+              }}
+            />
 
-          {/* 自定义链接 */}
-          <CustomLinksPreview />
-
-          {/* 求职意向 */}
-          <JobIntentionPreview />
-
-          {/* 工作经历 */}
-          <SectionPreview
-            title="工作经历"
-            items={data.sections.work}
-            sectionType="work"
-          />
-
-          {/* 教育经历 */}
-          <SectionPreview
-            title="教育经历"
-            items={data.sections.education}
-            sectionType="education"
-          />
-
-          {/* 专业技能 */}
-          <SectionPreview
-            title="专业技能"
-            items={data.sections.skills}
-            sectionType="skills"
-          />
-
-          {/* 爱好 */}
-          <HobbiesPreview />
-
-          {/* 如果没有任何内容，显示提示 */}
-          {data.basicInfo.name === '' &&
-            data.sections.work.length === 0 &&
-            data.sections.education.length === 0 &&
-            data.sections.skills.length === 0 && (
+            {/* 如果没有任何内容，显示提示 */}
+            {!hasContent && (
               <div className="flex items-center justify-center h-64 text-gray-400">
                 <p>在左侧填写信息，此处将实时预览简历效果</p>
               </div>
