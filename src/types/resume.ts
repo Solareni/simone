@@ -49,6 +49,7 @@ export interface Sections {
 }
 
 export interface ResumeData {
+  id?: string;  // 简历ID
   title: string;
   basicInfo: BasicInfo;
   jobIntention: JobIntention;
@@ -56,6 +57,20 @@ export interface ResumeData {
   sections: Sections;
   customSections: CustomSection[];
   hobbies: string[];
+  createdAt?: string;  // 创建时间
+  updatedAt?: string;  // 更新时间
+}
+
+// 简历列表项（用于首页展示）
+export interface ResumeListItem {
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  preview?: {
+    name?: string;
+    position?: string;
+  };
 }
 
 export type ResumeAction =

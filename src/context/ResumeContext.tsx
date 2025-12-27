@@ -1,7 +1,8 @@
-import { createContext, useContext, useReducer } from 'react';
+import { createContext, useContext, useReducer, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { ResumeData, ResumeAction } from '../types/resume';
 import { initialResumeData } from '../data/initialResume';
+import { useResumeList } from './ResumeListContext';
 
 const ResumeStateContext = createContext<{ data: ResumeData; dispatch: (action: ResumeAction) => void } | undefined>(undefined);
 
@@ -126,8 +127,19 @@ function resumeReducer(state: ResumeData, action: ResumeAction): ResumeData {
   }
 }
 
-export function ResumeProvider({ children }: { children: ReactNode }) {
-  const [data, dispatch] = useReducer(resumeReducer, initialResumeData);
+export function ResumeProvider({ children, resumeId }: { children: ReactNode; resumeId: string }) {
+  const { getResumeData, saveResumeData } = useResumeList();
+
+  // 从 localStorage 加载简历数据
+  const loadedData = getResumeData(resumeId) || { ...initialResumeData, id: resumeId };
+  const [data, dispatch] = useReducer(resumeReducer, loadedData);
+
+  // 当数据变化时，保存到 localStorage
+  useEffect(() => {
+    if (resumeId) {
+      saveResumeData(resumeId, data);
+    }
+  }, [data, resumeId, saveResumeData]);
 
   return (
     <ResumeStateContext.Provider value={{ data, dispatch }}>
