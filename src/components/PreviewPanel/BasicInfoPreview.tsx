@@ -1,28 +1,33 @@
 import { useResume } from '../../context/ResumeContext';
+import { useStyle } from '../../context/StyleContext';
+import { resumeStyles } from '../../types/styles';
 
 export default function BasicInfoPreview() {
   const { data } = useResume();
   const { basicInfo } = data;
+  const { currentStyle } = useStyle();
+  const style = resumeStyles[currentStyle];
 
   return (
-    <div className="mb-6">
+    <div className={style.spacing.section}>
       {/* 头部：头像 + 基本信息 */}
       <div className="flex items-start gap-4 mb-6">
         {basicInfo.avatar && (
           <img
             src={basicInfo.avatar}
             alt="头像"
-            className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+            className="w-20 h-20 rounded-full object-cover border-2"
+            style={{ borderColor: style.colors.accent }}
           />
         )}
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-800 mb-1">
+          <h1 className={`text-2xl ${style.fonts.heading} mb-1`} style={{ color: style.colors.primary }}>
             {basicInfo.name || '姓名'}
           </h1>
           {basicInfo.jobTitle && (
-            <p className="text-lg text-gray-600 mb-2">{basicInfo.jobTitle}</p>
+            <p className="text-lg mb-2" style={{ color: style.colors.secondary }}>{basicInfo.jobTitle}</p>
           )}
-          <div className="flex flex-wrap gap-3 text-sm text-gray-600">
+          <div className="flex flex-wrap gap-3 text-sm" style={{ color: style.colors.secondary }}>
             {basicInfo.location && (
               <span className="flex items-center gap-1">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -61,7 +66,7 @@ export default function BasicInfoPreview() {
       </div>
 
       {/* 分隔线 */}
-      <div className="border-b border-gray-300"></div>
+      <div className="border-b" style={{ borderColor: style.colors.accent }}></div>
     </div>
   );
 }

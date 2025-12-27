@@ -29,13 +29,9 @@ export default function SectionEditor({ sectionType, title, description, id }: S
         description: '',
       }),
     };
-    // 先设置编辑状态，再添加item
+    // 先添加item到列表，再设置编辑状态
+    dispatch({ type: 'ADD_SECTION_ITEM', section: sectionType, item: newItem });
     setEditingId(newItem.id);
-    setEditForm(newItem);
-    // 使用setTimeout确保状态更新后再dispatch
-    setTimeout(() => {
-      dispatch({ type: 'ADD_SECTION_ITEM', section: sectionType, item: newItem });
-    }, 0);
   };
 
   const handleEdit = (item: SectionItem) => {
@@ -50,9 +46,13 @@ export default function SectionEditor({ sectionType, title, description, id }: S
   };
 
   const handleCancel = () => {
-    // 如果是新添加的项，需要从列表中删除
-    if (editingId && items.find(item => item.id === editingId)) {
-      dispatch({ type: 'DELETE_SECTION_ITEM', section: sectionType, id: editingId });
+    // 如果是新添加的项（还没有填写内容），从列表中删除
+    if (editingId) {
+      const item = items.find(item => item.id === editingId);
+      // 检查是否是空项（新添加但未保存）
+      if (item && !item.title && !item.companyName && !item.description) {
+        dispatch({ type: 'DELETE_SECTION_ITEM', section: sectionType, id: editingId });
+      }
     }
     setEditingId(null);
   };
@@ -64,10 +64,6 @@ export default function SectionEditor({ sectionType, title, description, id }: S
   };
 
   const isEditing = (itemId: string) => editingId === itemId;
-  
-  // 检查是否有正在编辑但尚未添加到列表中的新项
-  const isNewItem = editingId && !items.find(item => item.id === editingId);
-
 
   return (
     <div className="p-6 lg:p-8 border-t border-gray-200" id={id}>
@@ -146,18 +142,6 @@ export default function SectionEditor({ sectionType, title, description, id }: S
             )}
           </div>
         ))}
-
-        {/* 新添加项的编辑表单 */}
-        {isNewItem && (
-          <div className="border border-gray-200 rounded-xl p-5 bg-white shadow-sm hover:shadow-md transition-shadow">
-            <SectionItemEditor
-              sectionType={sectionType}
-              item={null}
-              onSave={handleSave}
-              onCancel={handleCancel}
-            />
-          </div>
-        )}
 
         <button
           onClick={handleAdd}
