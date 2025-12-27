@@ -13,7 +13,7 @@ export default function ConfigPanel() {
     <div className="bg-white">
       {/* 头部：简历标题 + AI翻译按钮 */}
       <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
-        <div className="px-6 lg:px-8 py-5">
+        <div className="px-6 lg:pl-40 lg:pr-8 py-5">
           <div className="flex items-center justify-between gap-4">
             <input
               type="text"
