@@ -4,7 +4,7 @@ import { resumeStyles } from '../../types/styles';
 import { transformResumeDataToDocument } from '../../transformers/documentTransformer';
 import { DocumentRenderer } from '../../renderers/htmlRenderer';
 import StyleSwitcher from './StyleSwitcher';
-import { exportToMarkdown, downloadMarkdown, exportToPDF } from '../../utils/export';
+import { exportToMarkdown, downloadMarkdown, exportToPDF, exportToPNG, exportPDFHTML } from '../../utils/export';
 import { useRef, useEffect, useState, useMemo } from 'react';
 import type { ResumeDocument } from '../../types/document';
 
@@ -60,6 +60,14 @@ export default function PreviewPanel() {
     await exportToPDF(data);
   };
 
+  const handleExportPNG = async () => {
+    await exportToPNG(data);
+  };
+
+  const handleExportPDFHTML = () => {
+    exportPDFHTML(data);
+  };
+
   // 检查是否有任何内容
   const hasContent =
     data.basicInfo.name !== '' ||
@@ -74,6 +82,8 @@ export default function PreviewPanel() {
         <StyleSwitcher
           onExportMarkdown={handleExportMarkdown}
           onExportPDF={handleExportPDF}
+          onExportPNG={handleExportPNG}
+          onExportPDFHTML={handleExportPDFHTML}
         />
       </div>
 

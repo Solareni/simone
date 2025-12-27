@@ -6,9 +6,11 @@ import type { ResumeStyle } from '../../types/styles';
 interface StyleSwitcherProps {
   onExportMarkdown: () => void;
   onExportPDF: () => void;
+  onExportPNG: () => void;
+  onExportPDFHTML: () => void;
 }
 
-export default function StyleSwitcher({ onExportMarkdown, onExportPDF }: StyleSwitcherProps) {
+export default function StyleSwitcher({ onExportMarkdown, onExportPDF, onExportPNG, onExportPDFHTML }: StyleSwitcherProps) {
   const { currentStyle, setStyle } = useStyle();
   const [isStyleMenuOpen, setIsStyleMenuOpen] = useState(false);
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
@@ -132,6 +134,39 @@ export default function StyleSwitcher({ onExportMarkdown, onExportPDF }: StyleSw
                 <div>
                   <div className="font-medium text-gray-900">PDF</div>
                   <div className="text-xs text-gray-500">导出为 PDF 文件</div>
+                </div>
+              </button>
+              <button
+                onClick={() => {
+                  onExportPNG();
+                  setIsExportMenuOpen(false);
+                }}
+                className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-center gap-3 text-sm border-t"
+              >
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <div>
+                  <div className="font-medium text-gray-900">PNG</div>
+                  <div className="text-xs text-gray-500">导出为 PNG 图片</div>
+                </div>
+              </button>
+              <button
+                onClick={() => {
+                  onExportPDFHTML();
+                  setIsExportMenuOpen(false);
+                }}
+                className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-center gap-3 text-sm border-t"
+              >
+                <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                </svg>
+                <div>
+                  <div className="font-medium text-gray-900 flex items-center gap-2">
+                    PDF HTML
+                    <span className="text-xs text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded">调试</span>
+                  </div>
+                  <div className="text-xs text-gray-500">导出 PDF 的 HTML 源码</div>
                 </div>
               </button>
             </div>
