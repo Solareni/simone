@@ -111,7 +111,6 @@ export function exportPDFHTML(data: ResumeData, filename?: string): void {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     font-size: 12px;
     line-height: 1.5;
-    overflow: hidden;
   `.trim();
 
   // 4. 生成文档HTML内容
@@ -135,6 +134,52 @@ export function exportPDFHTML(data: ResumeData, filename?: string): void {
     .pdf-container {
       ${containerStyles}
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    /* 打印专用样式 */
+    @media print {
+      @page {
+        size: A4;
+        margin: 10mm;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: white;
+      }
+
+      .pdf-container {
+        width: 100%;
+        min-height: auto;
+        padding: 0;
+        box-shadow: none;
+        overflow: visible;
+        margin: 0;
+      }
+
+      /* 优化分页控制 - 避免不必要的分页和空白 */
+      .section-block {
+        page-break-inside: auto;
+        page-break-after: auto;
+        margin-bottom: 12px;
+      }
+
+      .section-item {
+        page-break-inside: avoid;
+        page-break-after: auto;
+      }
+
+      /* 避免标题后强制分页 */
+      h1, h2, h3 {
+        page-break-after: avoid;
+        page-break-inside: avoid;
+      }
+
+      /* 确保内容紧凑 */
+      * {
+        max-width: 100%;
+      }
     }
   </style>
 </head>

@@ -103,11 +103,13 @@ export async function exportToPDF(
 			orientation: "portrait" as const,
 			compress: true,
 		},
-		// 改进分页配置 - 避免在关键元素处分页
+		// 改进分页配置 - 移除avoid-all以避免首页空白问题
+		// 参考: https://github.com/eKoopmans/html2pdf.js/issues/672
 		pagebreak: {
-			mode: ["avoid-all", "css", "legacy"],
-			avoid: ".no-break, .section-block, .section-item, header, h1, h2, h3",
+			mode: ["css", "legacy"],
+			// 不使用avoid-all和avoid属性，而是完全依赖CSS的page-break控制
 			before: ".page-break-before",
+			after: ".page-break-after",
 		},
 	};
 

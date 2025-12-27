@@ -65,7 +65,7 @@ export function generateHeaderHTML(
 	style: ResumeStyle
 ): string {
 	let html =
-		'<div style="margin-bottom: 20px; page-break-inside: avoid; break-inside: avoid;">';
+		'<div style="margin-bottom: 20px; page-break-inside: avoid;">';
 
 	// 头像 + 基本信息
 	html +=
@@ -145,7 +145,7 @@ export function generateSectionHTML(
 			? "16"
 			: "24";
 
-	let html = `<div class="section-block" style="margin-bottom: ${marginBottom}px; page-break-inside: avoid; break-inside: avoid;">`;
+	let html = `<div class="section-block" style="margin-bottom: ${marginBottom}px; page-break-inside: auto;">`;
 
 	// 章节标题
 	html += `<h2 style="font-size: 16px; font-weight: bold; color: ${style.colors.primary}; margin: 0 0 8px 0; display: flex; align-items: center; gap: 8px; page-break-after: avoid; break-after: avoid;">`;
