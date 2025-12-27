@@ -57,18 +57,6 @@ export default function BasicInfoForm() {
         </div>
       </div>
 
-      {/* 职位名称 - 单独一行 */}
-      <div className="mb-6">
-        <label className="block text-sm font-semibold text-gray-700 mb-2">职位名称</label>
-        <input
-          type="text"
-          value={basicInfo.jobTitle || ''}
-          onChange={(e) => handleUpdate('jobTitle', e.target.value)}
-          placeholder="例如：前端开发工程师"
-          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm hover:shadow-md text-gray-900"
-        />
-      </div>
-
       {/* 四行两列布局 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         {/* 第一行 */}

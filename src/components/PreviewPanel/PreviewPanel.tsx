@@ -2,6 +2,7 @@ import { useResume } from '../../context/ResumeContext';
 import { useStyle } from '../../context/StyleContext';
 import { resumeStyles } from '../../types/styles';
 import BasicInfoPreview from './BasicInfoPreview';
+import JobIntentionPreview from './JobIntentionPreview';
 import SectionPreview, { HobbiesPreview, CustomLinksPreview } from './SectionPreview';
 import StyleSwitcher from './StyleSwitcher';
 import { exportToMarkdown, downloadMarkdown, exportToPDF } from '../../utils/export';
@@ -47,6 +48,9 @@ export default function PreviewPanel() {
 
           {/* 自定义链接 */}
           <CustomLinksPreview />
+
+          {/* 求职意向 */}
+          <JobIntentionPreview />
 
           {/* 工作经历 */}
           <SectionPreview

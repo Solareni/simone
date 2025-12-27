@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 
 const navItems = [
   { id: 'basic-info', label: '基本信息' },
+  { id: 'job-intention', label: '求职意向' },
   { id: 'custom-links', label: '自定义链接' },
   { id: 'work-experience', label: '工作经历' },
   { id: 'education', label: '教育经历' },

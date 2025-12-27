@@ -10,69 +10,6 @@
   display: none;
 }
 
-/* 打印样式优化 - 用于PDF导出 */
-@media print {
-  /* 重置页面样式 */
-  body {
-    background: white !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  /* 设置A4纸张大小 */
-  @page {
-    size: A4;
-    margin: 0;
-  }
-
-  /* 隐藏左侧配置面板 */
-  .lg\:w-1\/2:first-child {
-    display: none !important;
-  }
-
-  /* 隐藏顶部工具栏 */
-  .print\:hidden {
-    display: none !important;
-  }
-
-  /* 右侧预览占满整个页面 */
-  .lg\:w-1\/2:last-child {
-    width: 100% !important;
-    padding: 0 !important;
-    background: white !important;
-    overflow: visible !important;
-    height: auto !important;
-  }
-
-  /* 简历卡片占满打印区域 */
-  .print\:shadow-none {
-    box-shadow: none !important;
-  }
-
-  .print\:rounded-none {
-    border-radius: 0 !important;
-  }
-
-  /* 确保简历内容适应A4纸张 */
-  .max-w-\[210mm\] {
-    max-width: 100% !important;
-    width: 210mm !important;
-    min-height: 297mm !important;
-    margin: 0 auto !important;
-  }
-
-  /* 隐藏所有不必要的元素 */
-  nav, header, footer, aside, .no-print {
-    display: none !important;
-  }
-
-  /* 确保文字和背景色正确打印 */
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    color-adjust: exact !important;
-  }
-}
 
 /* 富文本内容样式 */
 .rich-text-content {

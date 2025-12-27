@@ -1,5 +1,4 @@
 export interface BasicInfo {
-  jobTitle: string;
   avatar: string;
   name: string;
   location: string;
@@ -7,6 +6,11 @@ export interface BasicInfo {
   email: string;
   birthDate: string;
   wechat: string;
+}
+
+export interface JobIntention {
+  position: string;  // 职位
+  salary: string;    // 薪资
 }
 
 export interface SectionItem {
@@ -47,6 +51,7 @@ export interface Sections {
 export interface ResumeData {
   title: string;
   basicInfo: BasicInfo;
+  jobIntention: JobIntention;
   customLinks: CustomLink[];
   sections: Sections;
   customSections: CustomSection[];
@@ -55,6 +60,7 @@ export interface ResumeData {
 
 export type ResumeAction =
   | { type: 'UPDATE_BASIC_INFO'; payload: Partial<BasicInfo> }
+  | { type: 'UPDATE_JOB_INTENTION'; payload: Partial<JobIntention> }
   | { type: 'UPDATE_TITLE'; title: string }
   | { type: 'ADD_SECTION_ITEM'; section: keyof Sections; item: SectionItem }
   | { type: 'UPDATE_SECTION_ITEM'; section: keyof Sections; id: string; item: Partial<SectionItem> }

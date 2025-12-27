@@ -1,6 +1,7 @@
 import { useResume } from '../../context/ResumeContext';
 import Navigator from './Navigator';
 import BasicInfoForm from './BasicInfoForm';
+import JobIntentionEditor from './JobIntentionEditor';
 import CustomLinksEditor from './CustomLinksEditor';
 import SectionEditor from './SectionEditor';
 import HobbiesEditor from './HobbiesEditor';
@@ -37,6 +38,7 @@ export default function ConfigPanel() {
       {/* 各个配置section */}
       <div className="pb-20">
         <BasicInfoForm />
+        <JobIntentionEditor />
         <CustomLinksEditor />
         <SectionEditor
           sectionType="work"

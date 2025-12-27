@@ -50,14 +50,13 @@ function htmlToMarkdown(html: string): string {
 }
 
 export function exportToMarkdown(data: ResumeData): string {
-  const { basicInfo, customLinks, sections, hobbies } = data;
+  const { basicInfo, jobIntention, customLinks, sections, hobbies } = data;
 
   let markdown = `# ${data.title || '简历'}\n\n`;
 
   // 基本信息
   markdown += `## 基本信息\n\n`;
   if (basicInfo.name) markdown += `**姓名**: ${basicInfo.name}\n\n`;
-  if (basicInfo.jobTitle) markdown += `**职位**: ${basicInfo.jobTitle}\n\n`;
   if (basicInfo.location) markdown += `**地点**: ${basicInfo.location}\n\n`;
   if (basicInfo.phone) markdown += `**电话**: ${basicInfo.phone}\n\n`;
   if (basicInfo.email) markdown += `**邮箱**: ${basicInfo.email}\n\n`;
@@ -75,6 +74,13 @@ export function exportToMarkdown(data: ResumeData): string {
       }
     });
     markdown += '\n';
+  }
+
+  // 求职意向
+  if (jobIntention.position || jobIntention.salary) {
+    markdown += `## 求职意向\n\n`;
+    if (jobIntention.position) markdown += `**职位**: ${jobIntention.position}\n\n`;
+    if (jobIntention.salary) markdown += `**薪资**: ${jobIntention.salary}\n\n`;
   }
 
   // 工作经历

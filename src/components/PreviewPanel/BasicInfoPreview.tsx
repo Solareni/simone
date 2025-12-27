@@ -24,9 +24,6 @@ export default function BasicInfoPreview() {
           <h1 className={`text-2xl ${style.fonts.heading} mb-1`} style={{ color: style.colors.primary }}>
             {basicInfo.name || '姓名'}
           </h1>
-          {basicInfo.jobTitle && (
-            <p className="text-lg mb-2" style={{ color: style.colors.secondary }}>{basicInfo.jobTitle}</p>
-          )}
           <div className="flex flex-wrap gap-3 text-sm" style={{ color: style.colors.secondary }}>
             {basicInfo.location && (
               <span className="flex items-center gap-1">

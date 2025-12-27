@@ -19,6 +19,12 @@ function resumeReducer(state: ResumeData, action: ResumeAction): ResumeData {
         basicInfo: { ...state.basicInfo, ...action.payload },
       };
 
+    case 'UPDATE_JOB_INTENTION':
+      return {
+        ...state,
+        jobIntention: { ...state.jobIntention, ...action.payload },
+      };
+
     case 'ADD_SECTION_ITEM':
       return {
         ...state,
