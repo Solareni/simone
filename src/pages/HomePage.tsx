@@ -1,9 +1,9 @@
-import { useResumeList } from '../context/ResumeListContext';
+import { useResumeListStore } from '../stores/resumeListStore';
 import { useEffect, useState } from 'react';
 import { formatDateForDisplay } from '../utils/dateUtils';
 
 export default function HomePage() {
-  const { resumes, createResume, deleteResume, setCurrentResumeId, storageError, clearStorageError } = useResumeList();
+  const { resumes, createResume, deleteResume, setCurrentResumeId, storageError, clearStorageError } = useResumeListStore();
   const [showError, setShowError] = useState<string | null>(null);
 
   // 显示存储错误提示

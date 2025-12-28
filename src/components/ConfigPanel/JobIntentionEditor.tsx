@@ -1,11 +1,12 @@
-import { useResume } from '../../context/ResumeContext';
+import { useResumeStore } from '../../stores/resumeStore';
 
 export default function JobIntentionEditor() {
-  const { data, dispatch } = useResume();
+  const data = useResumeStore((state) => state.data);
+  const updateJobIntention = useResumeStore((state) => state.updateJobIntention);
   const { jobIntention } = data;
 
   const handleUpdate = (field: keyof typeof jobIntention, value: string) => {
-    dispatch({ type: 'UPDATE_JOB_INTENTION', payload: { [field]: value } });
+    updateJobIntention({ [field]: value });
   };
 
   return (

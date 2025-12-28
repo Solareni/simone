@@ -1,19 +1,11 @@
-import { ResumeListProvider, useResumeList } from './context/ResumeListContext';
+import { useResumeListStore } from './stores/resumeListStore';
 import HomePage from './pages/HomePage';
 import ResumeEditor from './pages/ResumeEditor';
 
-function AppRouter() {
-  const { currentResumeId } = useResumeList();
+function App() {
+  const currentResumeId = useResumeListStore((state) => state.currentResumeId);
 
   return currentResumeId ? <ResumeEditor /> : <HomePage />;
-}
-
-function App() {
-  return (
-    <ResumeListProvider>
-      <AppRouter />
-    </ResumeListProvider>
-  );
 }
 
 export default App;

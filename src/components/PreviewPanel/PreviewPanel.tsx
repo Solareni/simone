@@ -1,5 +1,5 @@
-import { useResume } from '../../context/ResumeContext';
-import { useStyle } from '../../context/StyleContext';
+import { useResumeStore } from '../../stores/resumeStore';
+import { useStyleStore } from '../../stores/styleStore';
 import { resumeStyles } from '../../types/styles';
 import { transformResumeDataToDocument } from '../../transformers/documentTransformer';
 import { DocumentRenderer } from '../../renderers/htmlRenderer';
@@ -14,8 +14,8 @@ import { A4_HEIGHT_PX } from '../../constants';
 type ExportStatus = 'idle' | 'exporting-pdf' | 'exporting-png';
 
 export default function PreviewPanel() {
-  const { data } = useResume();
-  const { currentStyle } = useStyle();
+  const data = useResumeStore((state) => state.data);
+  const currentStyle = useStyleStore((state) => state.currentStyle);
   const style = resumeStyles[currentStyle];
   const contentRef = useRef<HTMLDivElement>(null);
   const [pageBreaks, setPageBreaks] = useState<number[]>([]);

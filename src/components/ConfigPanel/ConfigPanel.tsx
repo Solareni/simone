@@ -1,4 +1,4 @@
-import { useResume } from '../../context/ResumeContext';
+import { useResumeStore } from '../../stores/resumeStore';
 import Navigator from './Navigator';
 import BasicInfoForm from './BasicInfoForm';
 import JobIntentionEditor from './JobIntentionEditor';
@@ -7,7 +7,8 @@ import SectionEditor from './SectionEditor';
 import HobbiesEditor from './HobbiesEditor';
 
 export default function ConfigPanel() {
-  const { data, dispatch } = useResume();
+  const data = useResumeStore((state) => state.data);
+  const updateTitle = useResumeStore((state) => state.updateTitle);
 
   return (
     <div className="bg-white">
@@ -17,7 +18,7 @@ export default function ConfigPanel() {
           <input
             type="text"
             value={data.title}
-            onChange={(e) => dispatch({ type: 'UPDATE_TITLE', title: e.target.value })}
+            onChange={(e) => updateTitle(e.target.value)}
             className="text-2xl font-bold text-gray-900 border-none focus:outline-none focus:ring-0 w-full bg-transparent placeholder:text-gray-400"
             placeholder="未命名简历"
           />

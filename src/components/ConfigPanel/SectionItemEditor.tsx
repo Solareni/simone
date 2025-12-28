@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useResume } from '../../context/ResumeContext';
 import type { SectionItem } from '../../types/resume';
 import RichTextEditor from './RichTextEditor';
 

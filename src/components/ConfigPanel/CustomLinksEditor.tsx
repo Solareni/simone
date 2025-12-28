@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { useResume } from '../../context/ResumeContext';
+import { useResumeStore } from '../../stores/resumeStore';
 import type { CustomLink } from '../../types/resume';
 import { validateAndSanitizeUrl } from '../../utils/urlUtils';
 
 export default function CustomLinksEditor() {
-  const { data, dispatch } = useResume();
+  const data = useResumeStore((state) => state.data);
+  const addCustomLink = useResumeStore((state) => state.addCustomLink);
+  const updateCustomLink = useResumeStore((state) => state.updateCustomLink);
+  const deleteCustomLink = useResumeStore((state) => state.deleteCustomLink);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<CustomLink>>({});
   const [isCreating, setIsCreating] = useState(false);
@@ -39,7 +42,7 @@ export default function CustomLinksEditor() {
       url: newLinkForm.description.trim() || undefined,
       type: 'link',
     };
-    dispatch({ type: 'ADD_CUSTOM_LINK', link: linkToAdd });
+    addCustomLink(linkToAdd);
     setIsCreating(false);
     setNewLinkForm({ text: '', description: '' });
     setUrlError('');
@@ -72,7 +75,7 @@ export default function CustomLinksEditor() {
       editForm.url = sanitizedUrl;
     }
 
-    dispatch({ type: 'UPDATE_CUSTOM_LINK', id: editingId, link: editForm });
+    updateCustomLink(editingId, editForm);
     setEditingId(null);
     setEditForm({});
     setUrlError('');
@@ -85,7 +88,7 @@ export default function CustomLinksEditor() {
 
   const handleDelete = (linkId: string) => {
     if (confirm('确定删除此项吗？')) {
-      dispatch({ type: 'DELETE_CUSTOM_LINK', id: linkId });
+      deleteCustomLink(linkId);
     }
   };
 

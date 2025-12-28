@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useStyle } from '../../context/StyleContext';
+import { useStyleStore } from '../../stores/styleStore';
 import { resumeStyles } from '../../types/styles';
 import type { ResumeStyle } from '../../types/styles';
 
@@ -12,7 +12,8 @@ interface StyleSwitcherProps {
 }
 
 export default function StyleSwitcher({ onExportPDF, onExportPNG, exportStatus = 'idle' }: StyleSwitcherProps) {
-  const { currentStyle, setStyle } = useStyle();
+  const currentStyle = useStyleStore((state) => state.currentStyle);
+  const setStyle = useStyleStore((state) => state.setStyle);
   const [isStyleMenuOpen, setIsStyleMenuOpen] = useState(false);
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
 

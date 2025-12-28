@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useResume } from '../../context/ResumeContext';
+import { useResumeStore } from '../../stores/resumeStore';
 import type { SectionItem } from '../../types/resume';
 import SectionItemEditor from './SectionItemEditor';
 
@@ -11,7 +11,10 @@ interface SectionEditorProps {
 }
 
 export default function SectionEditor({ sectionType, title, description, id }: SectionEditorProps) {
-  const { data, dispatch } = useResume();
+  const data = useResumeStore((state) => state.data);
+  const addSectionItem = useResumeStore((state) => state.addSectionItem);
+  const updateSectionItem = useResumeStore((state) => state.updateSectionItem);
+  const deleteSectionItem = useResumeStore((state) => state.deleteSectionItem);
   const items = data.sections[sectionType];
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -30,7 +33,7 @@ export default function SectionEditor({ sectionType, title, description, id }: S
       }),
     };
     // 先添加item到列表，再设置编辑状态
-    dispatch({ type: 'ADD_SECTION_ITEM', section: sectionType, item: newItem });
+    addSectionItem(sectionType, newItem);
     setEditingId(newItem.id);
   };
 
@@ -40,7 +43,7 @@ export default function SectionEditor({ sectionType, title, description, id }: S
 
   const handleSave = (itemData: Partial<SectionItem>) => {
     if (editingId) {
-      dispatch({ type: 'UPDATE_SECTION_ITEM', section: sectionType, id: editingId, item: itemData });
+      updateSectionItem(sectionType, editingId, itemData);
       setEditingId(null);
     }
   };
@@ -51,7 +54,7 @@ export default function SectionEditor({ sectionType, title, description, id }: S
       const item = items.find(item => item.id === editingId);
       // 检查是否是空项（新添加但未保存）
       if (item && !item.title && !item.companyName && !item.description) {
-        dispatch({ type: 'DELETE_SECTION_ITEM', section: sectionType, id: editingId });
+        deleteSectionItem(sectionType, editingId);
       }
     }
     setEditingId(null);
@@ -59,7 +62,7 @@ export default function SectionEditor({ sectionType, title, description, id }: S
 
   const handleDelete = (itemId: string) => {
     if (confirm('确定删除此项吗？')) {
-      dispatch({ type: 'DELETE_SECTION_ITEM', section: sectionType, id: itemId });
+      deleteSectionItem(sectionType, itemId);
     }
   };
 

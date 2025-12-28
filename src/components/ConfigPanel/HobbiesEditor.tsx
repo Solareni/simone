@@ -1,14 +1,16 @@
 import { useState } from 'react';
-import { useResume } from '../../context/ResumeContext';
+import { useResumeStore } from '../../stores/resumeStore';
 
 export default function HobbiesEditor() {
-  const { data, dispatch } = useResume();
+  const data = useResumeStore((state) => state.data);
+  const addHobby = useResumeStore((state) => state.addHobby);
+  const removeHobby = useResumeStore((state) => state.removeHobby);
   const [inputValue, setInputValue] = useState('');
 
   const handleAdd = () => {
     const value = inputValue.trim();
     if (value && !data.hobbies.includes(value)) {
-      dispatch({ type: 'ADD_HOBBY', hobby: value });
+      addHobby(value);
       setInputValue('');
     }
   };
@@ -21,7 +23,7 @@ export default function HobbiesEditor() {
   };
 
   const handleRemove = (index: number) => {
-    dispatch({ type: 'REMOVE_HOBBY', index });
+    removeHobby(index);
   };
 
   return (

@@ -1,9 +1,10 @@
-import { useResume } from '../../context/ResumeContext';
+import { useResumeStore } from '../../stores/resumeStore';
 import { validateEmailWithMessage, validatePhoneWithMessage, validateDateWithMessage } from '../../utils/validation';
 import { useFormValidation } from '../../hooks/useFormValidation';
 
 export default function BasicInfoForm() {
-  const { data, dispatch } = useResume();
+  const data = useResumeStore((state) => state.data);
+  const updateBasicInfo = useResumeStore((state) => state.updateBasicInfo);
   const { basicInfo } = data;
 
   // 使用表单验证 Hook
@@ -16,7 +17,7 @@ export default function BasicInfoForm() {
   });
 
   const handleUpdate = (field: keyof typeof basicInfo, value: string) => {
-    dispatch({ type: 'UPDATE_BASIC_INFO', payload: { [field]: value } });
+    updateBasicInfo({ [field]: value });
     // 使用 Hook 提供的防抖验证
     validateField(field, value);
   };
@@ -26,7 +27,7 @@ export default function BasicInfoForm() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        dispatch({ type: 'UPDATE_BASIC_INFO', payload: { avatar: reader.result as string } });
+        updateBasicInfo({ avatar: reader.result as string });
       };
       reader.readAsDataURL(file);
     }
