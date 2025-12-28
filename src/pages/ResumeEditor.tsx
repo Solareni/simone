@@ -3,8 +3,11 @@ import ConfigPanel from '../components/ConfigPanel/ConfigPanel';
 import PreviewPanel from '../components/PreviewPanel/PreviewPanel';
 import { useResumeListStore } from '../stores/resumeListStore';
 import { useResumeStore } from '../stores/resumeStore';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 export default function ResumeEditor() {
+  const { t } = useTranslation();
   const currentResumeId = useResumeListStore((state) => state.currentResumeId);
   const setCurrentResumeId = useResumeListStore((state) => state.setCurrentResumeId);
   const loadResume = useResumeStore((state) => state.loadResume);
@@ -26,6 +29,11 @@ export default function ResumeEditor() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* 语言切换器 */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageSwitcher />
+      </div>
+
       {/* 返回首页按钮 */}
       <div className="fixed top-4 left-4 z-50">
         <button
@@ -35,7 +43,7 @@ export default function ResumeEditor() {
           <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          <span className="text-gray-700 font-medium">返回首页</span>
+          <span className="text-gray-700 font-medium">{t('homePage.backToHome')}</span>
         </button>
       </div>
 

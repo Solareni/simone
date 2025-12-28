@@ -1,8 +1,10 @@
 import { useResumeStore } from '../../stores/resumeStore';
 import { validateEmailWithMessage, validatePhoneWithMessage, validateDateWithMessage } from '../../utils/validation';
 import { useFormValidation } from '../../hooks/useFormValidation';
+import { useTranslation } from 'react-i18next';
 
 export default function BasicInfoForm() {
+  const { t } = useTranslation();
   const data = useResumeStore((state) => state.data);
   const updateBasicInfo = useResumeStore((state) => state.updateBasicInfo);
   const { basicInfo } = data;
@@ -36,20 +38,20 @@ export default function BasicInfoForm() {
   return (
     <div className="p-6 lg:p-8" id="basic-info">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">基本信息</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('basicInfo.title')}</h2>
         <p className="text-sm text-gray-500">
-          包含你的个人信息以及联系方式
+          {t('basicInfo.subtitle')}
         </p>
       </div>
 
       {/* 头像上传 - 单独一行 */}
       <div className="mb-6">
-        <label className="block text-sm font-semibold text-gray-700 mb-3">头像</label>
+        <label className="block text-sm font-semibold text-gray-700 mb-3">{t('basicInfo.avatar')}</label>
         <div className="flex items-center gap-4">
           <div className="relative">
             <img
               src={basicInfo.avatar}
-              alt="头像"
+              alt={t('basicInfo.avatar')}
               className="w-20 h-20 rounded-xl object-cover border-2 border-gray-200 shadow-sm"
             />
             <div className="absolute inset-0 rounded-xl bg-black/0 hover:bg-black/5 transition-colors"></div>
@@ -59,7 +61,7 @@ export default function BasicInfoForm() {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              上传头像
+              {t('basicInfo.uploadAvatar')}
             </span>
             <input
               type="file"
@@ -75,34 +77,34 @@ export default function BasicInfoForm() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         {/* 第一行 */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">姓名</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">{t('basicInfo.name')}</label>
           <input
             type="text"
             value={basicInfo.name || ''}
             onChange={(e) => handleUpdate('name', e.target.value)}
-            placeholder="你的姓名"
+            placeholder={t('basicInfo.namePlaceholder')}
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm hover:shadow-md text-gray-900"
           />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">工作地点</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">{t('basicInfo.location')}</label>
           <input
             type="text"
             value={basicInfo.location || ''}
             onChange={(e) => handleUpdate('location', e.target.value)}
-            placeholder="例如：北京"
+            placeholder={t('basicInfo.locationPlaceholder')}
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm hover:shadow-md text-gray-900"
           />
         </div>
 
         {/* 第二行 */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">手机号码</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">{t('basicInfo.phone')}</label>
           <input
             type="tel"
             value={basicInfo.phone || ''}
             onChange={(e) => handleUpdate('phone', e.target.value)}
-            placeholder="你的手机号码"
+            placeholder={t('basicInfo.phonePlaceholder')}
             className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all bg-white shadow-sm hover:shadow-md text-gray-900 ${
               errors.phone
                 ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -119,12 +121,12 @@ export default function BasicInfoForm() {
           )}
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">电子邮件</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">{t('basicInfo.email')}</label>
           <input
             type="email"
             value={basicInfo.email || ''}
             onChange={(e) => handleUpdate('email', e.target.value)}
-            placeholder="your.email@example.com"
+            placeholder={t('basicInfo.emailPlaceholder')}
             className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all bg-white shadow-sm hover:shadow-md text-gray-900 ${
               errors.email
                 ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -143,7 +145,7 @@ export default function BasicInfoForm() {
 
         {/* 第三行 */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">出生日期</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">{t('basicInfo.birthDate')}</label>
           <input
             type="month"
             value={basicInfo.birthDate || ''}
@@ -164,12 +166,12 @@ export default function BasicInfoForm() {
           )}
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">微信号</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">{t('basicInfo.wechat')}</label>
           <input
             type="text"
             value={basicInfo.wechat || ''}
             onChange={(e) => handleUpdate('wechat', e.target.value)}
-            placeholder="你的微信号"
+            placeholder={t('basicInfo.wechatPlaceholder')}
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm hover:shadow-md text-gray-900"
           />
         </div>

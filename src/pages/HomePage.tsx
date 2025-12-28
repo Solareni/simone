@@ -1,8 +1,11 @@
 import { useResumeListStore } from '../stores/resumeListStore';
 import { useEffect, useState } from 'react';
 import { formatDateForDisplay } from '../utils/dateUtils';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 export default function HomePage() {
+  const { t } = useTranslation();
   const { resumes, createResume, deleteResume, setCurrentResumeId, storageError, clearStorageError } = useResumeListStore();
   const [showError, setShowError] = useState<string | null>(null);
 
@@ -29,7 +32,7 @@ export default function HomePage() {
 
   const handleDeleteResume = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm('确定要删除这份简历吗？')) {
+    if (confirm(t('homePage.deleteConfirm'))) {
       deleteResume(id);
     }
   };
@@ -40,9 +43,14 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      {/* 语言切换器 */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageSwitcher />
+      </div>
+
       {/* 错误提示 */}
       {showError && (
-        <div className="fixed top-4 right-4 z-50 max-w-md">
+        <div className="fixed top-20 right-4 z-50 max-w-md">
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 shadow-lg">
             <div className="flex items-start">
               <div className="flex-shrink-0">
@@ -51,7 +59,7 @@ export default function HomePage() {
                 </svg>
               </div>
               <div className="ml-3 flex-1">
-                <p className="text-sm font-medium text-red-800">存储错误</p>
+                <p className="text-sm font-medium text-red-800">{t('homePage.storageError')}</p>
                 <p className="mt-1 text-sm text-red-700">{showError}</p>
               </div>
               <div className="ml-4 flex-shrink-0">
@@ -73,10 +81,10 @@ export default function HomePage() {
         {/* 头部 */}
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-            我的简历
+            {t('homePage.title')}
           </h1>
           <p className="text-gray-600 text-lg">
-            创建和管理你的专业简历
+            {t('homePage.subtitle')}
           </p>
         </div>
 
@@ -93,7 +101,7 @@ export default function HomePage() {
               </svg>
             </div>
             <span className="text-lg font-semibold text-gray-700 group-hover:text-blue-600 transition-colors">
-              创建新简历
+              {t('homePage.createNew')}
             </span>
           </button>
 
@@ -108,7 +116,7 @@ export default function HomePage() {
               <button
                 onClick={(e) => handleDeleteResume(resume.id, e)}
                 className="absolute top-4 right-4 w-8 h-8 rounded-full bg-red-50 hover:bg-red-100 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                title="删除简历"
+                title={t('homePage.deleteResume')}
               >
                 <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -152,8 +160,8 @@ export default function HomePage() {
 
               {/* 时间信息 */}
               <div className="pt-4 border-t border-gray-100 space-y-1 text-xs text-gray-500">
-                <p>创建时间：{formatDate(resume.createdAt)}</p>
-                <p>更新时间：{formatDate(resume.updatedAt)}</p>
+                <p>{t('homePage.createdAt')}：{formatDate(resume.createdAt)}</p>
+                <p>{t('homePage.updatedAt')}：{formatDate(resume.updatedAt)}</p>
               </div>
             </div>
           ))}
@@ -165,7 +173,7 @@ export default function HomePage() {
             <svg className="w-24 h-24 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <p className="text-lg">还没有简历，点击上方卡片创建第一份简历吧</p>
+            <p className="text-lg">{t('homePage.emptyState')}</p>
           </div>
         )}
       </div>

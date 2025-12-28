@@ -7,6 +7,7 @@ import StyleSwitcher from './StyleSwitcher';
 import { exportToPDF, exportToPNG } from '../../utils/export';
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react';
 import { A4_HEIGHT_PX } from '../../constants';
+import { useTranslation } from 'react-i18next';
 
 /**
  * 导出状态类型
@@ -14,6 +15,7 @@ import { A4_HEIGHT_PX } from '../../constants';
 type ExportStatus = 'idle' | 'exporting-pdf' | 'exporting-png';
 
 export default function PreviewPanel() {
+  const { t } = useTranslation();
   const data = useResumeStore((state) => state.data);
   const currentStyle = useStyleStore((state) => state.currentStyle);
   const style = resumeStyles[currentStyle];
@@ -77,7 +79,7 @@ export default function PreviewPanel() {
     try {
       await exportToPDF(data, currentStyle);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '导出失败，请重试';
+      const errorMessage = error instanceof Error ? error.message : t('preview.exportError');
       setExportError(`PDF ${errorMessage}`);
     } finally {
       setExportStatus('idle');
@@ -90,7 +92,7 @@ export default function PreviewPanel() {
     try {
       await exportToPNG(data, currentStyle);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '导出失败，请重试';
+      const errorMessage = error instanceof Error ? error.message : t('preview.exportError');
       setExportError(`PNG ${errorMessage}`);
     } finally {
       setExportStatus('idle');
@@ -129,7 +131,7 @@ export default function PreviewPanel() {
               </svg>
             </div>
             <div className="ml-3 flex-1">
-              <p className="text-sm font-medium text-red-800">导出失败</p>
+              <p className="text-sm font-medium text-red-800">{t('preview.exportFailed')}</p>
               <p className="mt-1 text-sm text-red-700">{exportError}</p>
             </div>
             <div className="ml-4 flex-shrink-0">
@@ -164,7 +166,7 @@ export default function PreviewPanel() {
               <div className="border-t-2 border-dashed border-blue-400 opacity-60" />
               {/* 页码标识 */}
               <div className="absolute -top-3 right-0 bg-blue-100 px-3 py-1 rounded-full text-xs text-blue-700 font-medium shadow-sm">
-                第{index + 2}页
+                {t('preview.page', { page: index + 2 })}
               </div>
             </div>
           ))}
@@ -193,7 +195,7 @@ export default function PreviewPanel() {
             {/* 如果没有任何内容，显示提示 */}
             {!hasContent && (
               <div className="flex items-center justify-center h-64 text-gray-400">
-                <p>在左侧填写信息，此处将实时预览简历效果</p>
+                <p>{t('preview.emptyPreview')}</p>
               </div>
             )}
           </div>

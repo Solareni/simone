@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
-
-const navItems = [
-  { id: 'basic-info', label: '基本信息' },
-  { id: 'job-intention', label: '求职意向' },
-  { id: 'custom-links', label: '自定义链接' },
-  { id: 'work-experience', label: '工作经历' },
-  { id: 'education', label: '教育经历' },
-  { id: 'skills', label: '专业技能' },
-  { id: 'hobbies', label: '爱好' },
-];
+import { useTranslation } from 'react-i18next';
 
 export default function Navigator() {
+  const { t } = useTranslation();
   const [activeId, setActiveId] = useState('basic-info');
+
+  const navItems = [
+    { id: 'basic-info', label: t('navigator.basicInfo') },
+    { id: 'job-intention', label: t('navigator.jobIntention') },
+    { id: 'custom-links', label: t('navigator.customLinks') },
+    { id: 'work-experience', label: t('navigator.work') },
+    { id: 'education', label: t('navigator.education') },
+    { id: 'skills', label: t('navigator.skills') },
+    { id: 'hobbies', label: t('navigator.hobbies') },
+  ];
 
   useEffect(() => {
     const handleScroll = () => {

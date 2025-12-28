@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useResumeStore } from '../../stores/resumeStore';
+import { useTranslation } from 'react-i18next';
 
 export default function HobbiesEditor() {
+  const { t } = useTranslation();
   const data = useResumeStore((state) => state.data);
   const addHobby = useResumeStore((state) => state.addHobby);
   const removeHobby = useResumeStore((state) => state.removeHobby);
@@ -29,8 +31,8 @@ export default function HobbiesEditor() {
   return (
     <div className="p-6 lg:p-8 border-t border-gray-200" id="hobbies">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">爱好</h2>
-        <p className="text-sm text-gray-500">添加你的兴趣爱好</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('hobbies.title')}</h2>
+        <p className="text-sm text-gray-500">{t('hobbies.subtitle')}</p>
       </div>
 
       <div className="space-y-4">
@@ -41,14 +43,14 @@ export default function HobbiesEditor() {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="输入爱好，按回车添加"
+            placeholder={t('hobbies.placeholder')}
             className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm hover:shadow-md"
           />
           <button
             onClick={handleAdd}
             className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all shadow-sm hover:shadow-md font-medium"
           >
-            添加
+            {t('hobbies.add')}
           </button>
         </div>
 

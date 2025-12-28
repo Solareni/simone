@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useResumeStore } from '../../stores/resumeStore';
 import type { CustomLink } from '../../types/resume';
 import { validateAndSanitizeUrl } from '../../utils/urlUtils';
+import { useTranslation } from 'react-i18next';
 
 export default function CustomLinksEditor() {
+  const { t } = useTranslation();
   const data = useResumeStore((state) => state.data);
   const addCustomLink = useResumeStore((state) => state.addCustomLink);
   const updateCustomLink = useResumeStore((state) => state.updateCustomLink);
@@ -31,7 +33,7 @@ export default function CustomLinksEditor() {
     if (newLinkForm.description.trim()) {
       const sanitizedUrl = validateAndSanitizeUrl(newLinkForm.description);
       if (!sanitizedUrl) {
-        setUrlError('请输入有效的HTTP或HTTPS链接地址');
+        setUrlError(t('customLinks.urlError'));
         return;
       }
       setUrlError('');
@@ -67,7 +69,7 @@ export default function CustomLinksEditor() {
     if (editForm.type === 'link' && editForm.url?.trim()) {
       const sanitizedUrl = validateAndSanitizeUrl(editForm.url);
       if (!sanitizedUrl) {
-        setUrlError('请输入有效的HTTP或HTTPS链接地址');
+        setUrlError(t('customLinks.urlError'));
         return;
       }
       setUrlError('');
@@ -87,7 +89,7 @@ export default function CustomLinksEditor() {
   };
 
   const handleDelete = (linkId: string) => {
-    if (confirm('确定删除此项吗？')) {
+    if (confirm(t('customLinks.deleteConfirm'))) {
       deleteCustomLink(linkId);
     }
   };
@@ -95,9 +97,9 @@ export default function CustomLinksEditor() {
   return (
     <div className="p-6 lg:p-8 border-t border-gray-200" id="custom-links">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">自定义内容</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('customLinks.title')}</h2>
         <p className="text-sm text-gray-500">
-          添加个人网站、GitHub链接或其他自定义内容
+          {t('customLinks.subtitle')}
         </p>
       </div>
 
@@ -111,7 +113,7 @@ export default function CustomLinksEditor() {
                   type="text"
                   value={editForm.text || ''}
                   onChange={(e) => setEditForm({ ...editForm, text: e.target.value })}
-                  placeholder="显示文本"
+                  placeholder={t('customLinks.displayTextPlaceholder')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm"
                 />
                 {editForm.type === 'link' && (
@@ -123,7 +125,7 @@ export default function CustomLinksEditor() {
                         setEditForm({ ...editForm, url: e.target.value });
                         setUrlError(''); // 清除错误
                       }}
-                      placeholder="链接地址 (https://...)"
+                      placeholder={t('customLinks.linkUrl')}
                       className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:border-blue-500 transition-all bg-white shadow-sm ${
                         urlError ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
                       }`}
@@ -138,21 +140,21 @@ export default function CustomLinksEditor() {
                   onChange={(e) => setEditForm({ ...editForm, type: e.target.value as 'link' | 'text' })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm"
                 >
-                  <option value="link">链接</option>
-                  <option value="text">文本</option>
+                  <option value="link">{t('customLinks.typeLink')}</option>
+                  <option value="text">{t('customLinks.typeText')}</option>
                 </select>
                 <div className="flex gap-3">
                   <button
                     onClick={handleSave}
                     className="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all shadow-sm hover:shadow-md text-sm font-medium"
                   >
-                    保存
+                    {t('customLinks.save')}
                   </button>
                   <button
                     onClick={handleCancel}
                     className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all text-sm font-medium"
                   >
-                    取消
+                    {t('customLinks.cancel')}
                   </button>
                 </div>
               </div>
@@ -160,26 +162,26 @@ export default function CustomLinksEditor() {
               // 显示模式
               <div>
                 <p className="font-medium text-gray-800 mb-1">
-                  {link.text || '(未填写)'}
+                  {link.text || t('customLinks.untitled')}
                 </p>
                 {link.type === 'link' && link.url && (
                   <p className="text-sm text-gray-500 truncate">{link.url}</p>
                 )}
                 <p className="text-xs text-gray-400 mt-1">
-                  类型: {link.type === 'link' ? '链接' : '文本'}
+                  {t('customLinks.type')}: {link.type === 'link' ? t('customLinks.typeLink') : t('customLinks.typeText')}
                 </p>
                 <div className="flex gap-3 mt-4">
                   <button
                     onClick={() => handleEdit(link)}
                     className="px-4 py-2 text-sm bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all shadow-sm hover:shadow-md font-medium"
                   >
-                    编辑
+                    {t('customLinks.edit')}
                   </button>
                   <button
                     onClick={() => handleDelete(link.id)}
                     className="px-4 py-2 text-sm bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all shadow-sm hover:shadow-md font-medium"
                   >
-                    删除
+                    {t('customLinks.delete')}
                   </button>
                 </div>
               </div>
@@ -192,18 +194,18 @@ export default function CustomLinksEditor() {
           <div className="border-2 border-dashed border-blue-300 rounded-xl p-4 bg-blue-50/50">
             <div className="flex flex-wrap gap-3 items-end">
               <div className="flex-1 min-w-[150px]">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">名称</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{t('customLinks.name')}</label>
                 <input
                   type="text"
                   value={newLinkForm.text}
                   onChange={(e) => setNewLinkForm({ ...newLinkForm, text: e.target.value })}
-                  placeholder="名称"
+                  placeholder={t('customLinks.namePlaceholder')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm"
                   autoFocus
                 />
               </div>
               <div className="flex-1 min-w-[200px]">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">链接地址</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{t('customLinks.url')}</label>
                 <input
                   type="url"
                   value={newLinkForm.description}
@@ -211,7 +213,7 @@ export default function CustomLinksEditor() {
                     setNewLinkForm({ ...newLinkForm, description: e.target.value });
                     setUrlError(''); // 清除错误
                   }}
-                  placeholder="https://..."
+                  placeholder={t('customLinks.urlPlaceholder')}
                   className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:border-blue-500 transition-all bg-white shadow-sm ${
                     urlError ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
                   }`}
@@ -226,13 +228,13 @@ export default function CustomLinksEditor() {
                   disabled={!newLinkForm.text.trim()}
                   className="px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all shadow-sm hover:shadow-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 >
-                  创建
+                  {t('customLinks.create')}
                 </button>
                 <button
                   onClick={handleCreateCancel}
                   className="px-5 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all text-sm font-medium whitespace-nowrap"
                 >
-                  取消
+                  {t('customLinks.cancel')}
                 </button>
               </div>
             </div>
@@ -245,7 +247,7 @@ export default function CustomLinksEditor() {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            添加新的内容
+            {t('customLinks.add')}
           </button>
         )}
       </div>
