@@ -7,6 +7,7 @@ import html2canvas from "html2canvas";
 import type { ResumeDocument, RenderOptions } from "../types/document";
 import { resumeStyles } from "../types/styles";
 import { generateDocumentHTML } from "./shared/htmlGenerator";
+import { A4_WIDTH_PX, PNG_EXPORT_DEFAULTS } from "../constants";
 
 /**
  * PNG导出选项
@@ -35,11 +36,11 @@ function createPNGContainer(
 	const style = resumeStyles[options.style || "modern"];
 
 	// A4尺寸换算为像素（96 DPI）
-	const A4_WIDTH_PX = options.width || 794; // 210mm * 96 DPI / 25.4mm
+	const width = options.width || A4_WIDTH_PX;
 
 	// 创建容器元素
 	const container = window.document.createElement("div");
-	container.style.width = `${A4_WIDTH_PX}px`;
+	container.style.width = `${width}px`;
 	container.style.padding = "40px"; // 页边距
 	container.style.backgroundColor = options.backgroundColor || style.colors.background;
 	container.style.color = style.colors.text;
@@ -90,8 +91,7 @@ export async function exportToPNG(
 ): Promise<void> {
 	const {
 		filename = "resume.png",
-		quality = 1,
-		scale = 2, // 2倍分辨率，提高清晰度
+		scale = PNG_EXPORT_DEFAULTS.SCALE, // 2倍分辨率，提高清晰度
 		style = "modern",
 	} = options;
 
@@ -122,8 +122,8 @@ export async function exportToPNG(
 		// 下载PNG
 		downloadCanvasAsPNG(canvas, filename);
 	} catch (error) {
-		console.error("PNG导出失败:", error);
-		throw error;
+		const errorMessage = error instanceof Error ? error.message : '未知错误';
+		throw new Error(`PNG导出失败: ${errorMessage}`);
 	} finally {
 		// 清理：从DOM中移除容器
 		document.body.removeChild(container);

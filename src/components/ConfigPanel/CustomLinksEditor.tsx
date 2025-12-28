@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useResume } from '../../context/ResumeContext';
 import type { CustomLink } from '../../types/resume';
+import { validateAndSanitizeUrl } from '../../utils/urlUtils';
 
 export default function CustomLinksEditor() {
   const { data, dispatch } = useResume();
@@ -11,6 +12,7 @@ export default function CustomLinksEditor() {
     text: '',
     description: '',
   });
+  const [urlError, setUrlError] = useState<string>('');
 
   const handleAddClick = () => {
     setIsCreating(true);
@@ -18,16 +20,29 @@ export default function CustomLinksEditor() {
   };
 
   const handleCreate = () => {
-    if (newLinkForm.text.trim()) {
-      const linkToAdd: Omit<CustomLink, 'id'> = {
-        text: newLinkForm.text,
-        url: newLinkForm.description,
-        type: 'link',
-      };
-      dispatch({ type: 'ADD_CUSTOM_LINK', link: linkToAdd });
-      setIsCreating(false);
-      setNewLinkForm({ text: '', description: '' });
+    if (!newLinkForm.text.trim()) {
+      return;
     }
+
+    // 如果有URL输入，验证URL格式
+    if (newLinkForm.description.trim()) {
+      const sanitizedUrl = validateAndSanitizeUrl(newLinkForm.description);
+      if (!sanitizedUrl) {
+        setUrlError('请输入有效的HTTP或HTTPS链接地址');
+        return;
+      }
+      setUrlError('');
+    }
+
+    const linkToAdd: Omit<CustomLink, 'id'> = {
+      text: newLinkForm.text,
+      url: newLinkForm.description.trim() || undefined,
+      type: 'link',
+    };
+    dispatch({ type: 'ADD_CUSTOM_LINK', link: linkToAdd });
+    setIsCreating(false);
+    setNewLinkForm({ text: '', description: '' });
+    setUrlError('');
   };
 
   const handleCreateCancel = () => {
@@ -41,11 +56,26 @@ export default function CustomLinksEditor() {
   };
 
   const handleSave = () => {
-    if (editingId) {
-      dispatch({ type: 'UPDATE_CUSTOM_LINK', id: editingId, link: editForm });
-      setEditingId(null);
-      setEditForm({});
+    if (!editingId || !editForm.text?.trim()) {
+      return;
     }
+
+    // 如果是链接类型且有URL输入，验证URL格式
+    if (editForm.type === 'link' && editForm.url?.trim()) {
+      const sanitizedUrl = validateAndSanitizeUrl(editForm.url);
+      if (!sanitizedUrl) {
+        setUrlError('请输入有效的HTTP或HTTPS链接地址');
+        return;
+      }
+      setUrlError('');
+      // 使用清理后的URL
+      editForm.url = sanitizedUrl;
+    }
+
+    dispatch({ type: 'UPDATE_CUSTOM_LINK', id: editingId, link: editForm });
+    setEditingId(null);
+    setEditForm({});
+    setUrlError('');
   };
 
   const handleCancel = () => {
@@ -82,13 +112,23 @@ export default function CustomLinksEditor() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm"
                 />
                 {editForm.type === 'link' && (
-                  <input
-                    type="url"
-                    value={editForm.url || ''}
-                    onChange={(e) => setEditForm({ ...editForm, url: e.target.value })}
-                    placeholder="链接地址 (https://...)"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm"
-                  />
+                  <div>
+                    <input
+                      type="url"
+                      value={editForm.url || ''}
+                      onChange={(e) => {
+                        setEditForm({ ...editForm, url: e.target.value });
+                        setUrlError(''); // 清除错误
+                      }}
+                      placeholder="链接地址 (https://...)"
+                      className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:border-blue-500 transition-all bg-white shadow-sm ${
+                        urlError ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                      }`}
+                    />
+                    {urlError && (
+                      <p className="text-red-600 text-sm mt-1">{urlError}</p>
+                    )}
+                  </div>
                 )}
                 <select
                   value={editForm.type || 'link'}
@@ -160,14 +200,22 @@ export default function CustomLinksEditor() {
                 />
               </div>
               <div className="flex-1 min-w-[200px]">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">描述</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">链接地址</label>
                 <input
-                  type="text"
+                  type="url"
                   value={newLinkForm.description}
-                  onChange={(e) => setNewLinkForm({ ...newLinkForm, description: e.target.value })}
-                  placeholder="描述"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm"
+                  onChange={(e) => {
+                    setNewLinkForm({ ...newLinkForm, description: e.target.value });
+                    setUrlError(''); // 清除错误
+                  }}
+                  placeholder="https://..."
+                  className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:border-blue-500 transition-all bg-white shadow-sm ${
+                    urlError ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                  }`}
                 />
+                {urlError && (
+                  <p className="text-red-600 text-sm mt-1">{urlError}</p>
+                )}
               </div>
               <div className="flex gap-2">
                 <button

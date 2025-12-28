@@ -7,6 +7,7 @@ import html2pdf from "html2pdf.js";
 import type { ResumeDocument, RenderOptions } from "../types/document";
 import { resumeStyles } from "../types/styles";
 import { generateDocumentHTML } from "./shared/htmlGenerator";
+import { A4_WIDTH_MM, A4_SCALE_FACTOR, PDF_EXPORT_DEFAULTS } from "../constants";
 
 /**
  * PDF导出选项
@@ -31,9 +32,6 @@ function createPDFContainer(
 	options: PDFExportOptions
 ): HTMLDivElement {
 	const style = resumeStyles[options.style || "modern"];
-
-	// A4尺寸 (mm)
-	const A4_WIDTH_MM = 210;
 
 	// 创建容器元素
 	const container = window.document.createElement("div");
@@ -66,8 +64,8 @@ export async function exportToPDF(
 ): Promise<void> {
 	const {
 		filename = "resume.pdf",
-		margin = 0, // 改为0，因为我们在容器上设置了padding
-		quality = 0.98,
+		margin = PDF_EXPORT_DEFAULTS.MARGIN,
+		quality = PDF_EXPORT_DEFAULTS.QUALITY,
 		style = "modern",
 	} = options;
 
@@ -76,9 +74,6 @@ export async function exportToPDF(
 
 	// 获取样式配置
 	const styleConfig = resumeStyles[style];
-
-	// A4尺寸 (mm)
-	const A4_WIDTH_MM = 210;
 
 	// 配置PDF选项
 	const pdfOptions = {
@@ -95,7 +90,7 @@ export async function exportToPDF(
 			scrollX: 0,
 			// 移除width参数,让html2canvas自动计算
 			// 这样可以确保渲染宽度与实际DOM宽度匹配
-			windowWidth: A4_WIDTH_MM * 3.78, // 96DPI参考窗口宽度
+			windowWidth: A4_WIDTH_MM * A4_SCALE_FACTOR, // 96DPI参考窗口宽度
 		},
 		jsPDF: {
 			unit: "mm" as const,
@@ -117,7 +112,7 @@ export async function exportToPDF(
 		// 生成并下载PDF
 		await html2pdf().set(pdfOptions).from(container).save();
 	} catch (error) {
-		console.error("PDF导出失败:", error);
-		throw error;
+		const errorMessage = error instanceof Error ? error.message : '未知错误';
+		throw new Error(`PDF导出失败: ${errorMessage}`);
 	}
 }

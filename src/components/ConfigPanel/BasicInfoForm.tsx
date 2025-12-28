@@ -1,12 +1,75 @@
 import { useResume } from '../../context/ResumeContext';
+import { validateEmailWithMessage, validatePhoneWithMessage, validateDateWithMessage } from '../../utils/validation';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { UI_CONFIG } from '../../constants';
 
 export default function BasicInfoForm() {
   const { data, dispatch } = useResume();
   const { basicInfo } = data;
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
+  // 防抖定时器
+  const debounceTimerRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+
+  // 清理防抖定时器
+  useEffect(() => {
+    return () => {
+      Object.values(debounceTimerRef.current).forEach(timer => clearTimeout(timer));
+    };
+  }, []);
 
   const handleUpdate = (field: keyof typeof basicInfo, value: string) => {
     dispatch({ type: 'UPDATE_BASIC_INFO', payload: { [field]: value } });
+
+    // 使用防抖验证
+    if (debounceTimerRef.current[field]) {
+      clearTimeout(debounceTimerRef.current[field]);
+    }
+
+    debounceTimerRef.current[field] = setTimeout(() => {
+      validateField(field, value);
+    }, UI_CONFIG.DEBOUNCE_DELAY);
   };
+
+  // 实时验证
+  const validationErrorsRef = useRef(validationErrors);
+  validationErrorsRef.current = validationErrors;
+
+  const validateField = useCallback((field: string, value: string) => {
+    const errors = { ...validationErrorsRef.current };
+
+    switch (field) {
+      case 'email': {
+        const validation = validateEmailWithMessage(value);
+        if (!validation.isValid && validation.message) {
+          errors.email = validation.message;
+        } else {
+          delete errors.email;
+        }
+        break;
+      }
+      case 'phone': {
+        const validation = validatePhoneWithMessage(value);
+        if (!validation.isValid && validation.message) {
+          errors.phone = validation.message;
+        } else {
+          delete errors.phone;
+        }
+        break;
+      }
+      case 'birthDate': {
+        const validation = validateDateWithMessage(value);
+        if (!validation.isValid && validation.message) {
+          errors.birthDate = validation.message;
+        } else {
+          delete errors.birthDate;
+        }
+        break;
+      }
+    }
+
+    setValidationErrors(errors);
+  }, []);
 
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -89,8 +152,20 @@ export default function BasicInfoForm() {
             value={basicInfo.phone || ''}
             onChange={(e) => handleUpdate('phone', e.target.value)}
             placeholder="你的手机号码"
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm hover:shadow-md text-gray-900"
+            className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all bg-white shadow-sm hover:shadow-md text-gray-900 ${
+              validationErrors.phone
+                ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+            }`}
           />
+          {validationErrors.phone && (
+            <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              {validationErrors.phone}
+            </p>
+          )}
         </div>
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">电子邮件</label>
@@ -99,8 +174,20 @@ export default function BasicInfoForm() {
             value={basicInfo.email || ''}
             onChange={(e) => handleUpdate('email', e.target.value)}
             placeholder="your.email@example.com"
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm hover:shadow-md text-gray-900"
+            className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all bg-white shadow-sm hover:shadow-md text-gray-900 ${
+              validationErrors.email
+                ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+            }`}
           />
+          {validationErrors.email && (
+            <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              {validationErrors.email}
+            </p>
+          )}
         </div>
 
         {/* 第三行 */}
@@ -110,8 +197,20 @@ export default function BasicInfoForm() {
             type="month"
             value={basicInfo.birthDate || ''}
             onChange={(e) => handleUpdate('birthDate', e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm hover:shadow-md text-gray-900"
+            className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all bg-white shadow-sm hover:shadow-md text-gray-900 ${
+              validationErrors.birthDate
+                ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+            }`}
           />
+          {validationErrors.birthDate && (
+            <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              {validationErrors.birthDate}
+            </p>
+          )}
         </div>
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">微信号</label>

@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, useEffect, useMemo } from 'react';
+import { createContext, useContext, useReducer, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import type { ResumeData, ResumeAction } from '../types/resume';
 import { initialResumeData } from '../data/initialResume';
@@ -134,16 +134,20 @@ export function ResumeProvider({ children, resumeId }: { children: ReactNode; re
   const loadedData = getResumeData(resumeId) || { ...initialResumeData, id: resumeId };
   const [data, dispatch] = useReducer(resumeReducer, loadedData);
 
-  // 使用序列化的data作为稳定的依赖项，避免无限循环
-  const dataKey = useMemo(() => JSON.stringify(data), [data]);
+  // 使用ref跟踪上一次保存的数据，避免每次序列化
+  const lastSavedDataRef = useRef<string>('');
 
   // 当数据变化时，保存到 localStorage
   useEffect(() => {
     if (resumeId) {
-      saveResumeData(resumeId, data);
+      const currentDataStr = JSON.stringify(data);
+      // 只在数据真正变化时保存
+      if (currentDataStr !== lastSavedDataRef.current) {
+        saveResumeData(resumeId, data);
+        lastSavedDataRef.current = currentDataStr;
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataKey, resumeId, saveResumeData]);
+  }, [data, resumeId, saveResumeData]);
 
   return (
     <ResumeStateContext.Provider value={{ data, dispatch }}>

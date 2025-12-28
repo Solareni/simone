@@ -5,8 +5,13 @@ import { transformResumeDataToDocument } from '../../transformers/documentTransf
 import { DocumentRenderer } from '../../renderers/htmlRenderer';
 import StyleSwitcher from './StyleSwitcher';
 import { exportToPDF, exportToPNG } from '../../utils/export';
-import { useRef, useEffect, useState, useMemo } from 'react';
-import type { ResumeDocument } from '../../types/document';
+import { useRef, useEffect, useState, useMemo, useCallback } from 'react';
+import { A4_HEIGHT_PX } from '../../constants';
+
+/**
+ * 导出状态类型
+ */
+type ExportStatus = 'idle' | 'exporting-pdf' | 'exporting-png';
 
 export default function PreviewPanel() {
   const { data } = useResume();
@@ -14,19 +19,16 @@ export default function PreviewPanel() {
   const style = resumeStyles[currentStyle];
   const contentRef = useRef<HTMLDivElement>(null);
   const [pageBreaks, setPageBreaks] = useState<number[]>([]);
+  const [exportStatus, setExportStatus] = useState<ExportStatus>('idle');
+  const [exportError, setExportError] = useState<string | null>(null);
 
-  // A4纸张高度（单位：像素，基于96DPI）
-  // 297mm = 1122.52px (at 96 DPI)
-  const A4_HEIGHT_PX = 1122.52;
-
-  // 使用序列化的data作为稳定的依赖项，避免无限循环
-  const dataKey = useMemo(() => JSON.stringify(data), [data]);
+  // A4纸张高度常量
 
   // 转换为文档模型（使用useMemo避免重复转换）
   const document = useMemo(() => transformResumeDataToDocument(data), [data]);
 
-  useEffect(() => {
-    // 动态计算页面分隔线位置
+  // 计算页面分隔线的函数
+  const calculatePageBreaks = useCallback(() => {
     if (contentRef.current) {
       const contentHeight = contentRef.current.scrollHeight;
       const breaks: number[] = [];
@@ -47,15 +49,56 @@ export default function PreviewPanel() {
         return breaksChanged ? breaks : prevBreaks;
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataKey]); // 使用序列化的dataKey而不是data对象
+  }, []);
+
+  // 使用ResizeObserver监听内容高度变化
+  useEffect(() => {
+    const contentElement = contentRef.current;
+    if (!contentElement) return;
+
+    // 初始计算
+    calculatePageBreaks();
+
+    // 创建ResizeObserver
+    const resizeObserver = new ResizeObserver(() => {
+      calculatePageBreaks();
+    });
+
+    resizeObserver.observe(contentElement);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [calculatePageBreaks]);
 
   const handleExportPDF = async () => {
-    await exportToPDF(data, currentStyle);
+    setExportStatus('exporting-pdf');
+    setExportError(null);
+    try {
+      await exportToPDF(data, currentStyle);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '导出失败，请重试';
+      setExportError(`PDF ${errorMessage}`);
+    } finally {
+      setExportStatus('idle');
+    }
   };
 
   const handleExportPNG = async () => {
-    await exportToPNG(data, currentStyle);
+    setExportStatus('exporting-png');
+    setExportError(null);
+    try {
+      await exportToPNG(data, currentStyle);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '导出失败，请重试';
+      setExportError(`PNG ${errorMessage}`);
+    } finally {
+      setExportStatus('idle');
+    }
+  };
+
+  const clearExportError = () => {
+    setExportError(null);
   };
 
   // 检查是否有任何内容
@@ -72,8 +115,36 @@ export default function PreviewPanel() {
         <StyleSwitcher
           onExportPDF={handleExportPDF}
           onExportPNG={handleExportPNG}
+          exportStatus={exportStatus}
         />
       </div>
+
+      {/* 导出错误提示 */}
+      {exportError && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <svg className="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3 flex-1">
+              <p className="text-sm font-medium text-red-800">导出失败</p>
+              <p className="mt-1 text-sm text-red-700">{exportError}</p>
+            </div>
+            <div className="ml-4 flex-shrink-0">
+              <button
+                onClick={clearExportError}
+                className="inline-flex text-red-400 hover:text-red-600 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 预览区域 */}
       <div className="flex items-start justify-center flex-1 overflow-auto">

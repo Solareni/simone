@@ -10,6 +10,7 @@ import type {
 } from '../types/document';
 import { resumeStyles } from '../types/styles';
 import { generateDocumentHTML } from './shared/htmlGenerator';
+import DOMPurify from 'dompurify';
 
 interface HTMLRendererProps {
   document: ResumeDocument;
@@ -26,6 +27,9 @@ export function DocumentRenderer({ document, options = {} }: HTMLRendererProps) 
   // 使用共享的HTML生成函数
   const html = generateDocumentHTML(document, options);
 
+  // 使用DOMPurify清理HTML，防止XSS攻击
+  const sanitizedHtml = DOMPurify.sanitize(html);
+
   return (
     <div
       className="resume-content"
@@ -33,7 +37,7 @@ export function DocumentRenderer({ document, options = {} }: HTMLRendererProps) 
         color: style.colors.text,
         backgroundColor: style.colors.background
       }}
-      dangerouslySetInnerHTML={{ __html: html }}
+      dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
     />
   );
 }

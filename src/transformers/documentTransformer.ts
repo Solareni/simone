@@ -14,6 +14,8 @@ import type {
   Link,
   DocumentBlock
 } from '../types/document';
+import DOMPurify from 'dompurify';
+import { validateAndSanitizeUrl } from '../utils/urlUtils';
 
 /**
  * 将HTML转换为纯文本
@@ -45,64 +47,25 @@ function htmlToPlainText(html: string): string {
 }
 
 /**
- * 将HTML转换为Markdown
- */
-function htmlToMarkdown(html: string): string {
-  if (!html) return '';
-
-  let text = html;
-
-  // 转换标题
-  text = text.replace(/<h1[^>]*>(.*?)<\/h1>/gi, '\n## $1\n');
-  text = text.replace(/<h2[^>]*>(.*?)<\/h2>/gi, '\n### $1\n');
-  text = text.replace(/<h3[^>]*>(.*?)<\/h3>/gi, '\n#### $1\n');
-
-  // 转换粗体和斜体
-  text = text.replace(/<strong[^>]*>(.*?)<\/strong>/gi, '**$1**');
-  text = text.replace(/<b[^>]*>(.*?)<\/b>/gi, '**$1**');
-  text = text.replace(/<em[^>]*>(.*?)<\/em>/gi, '*$1*');
-  text = text.replace(/<i[^>]*>(.*?)<\/i>/gi, '*$1*');
-
-  // 转换链接
-  text = text.replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi, '[$2]($1)');
-
-  // 转换列表
-  text = text.replace(/<ul[^>]*>/gi, '\n');
-  text = text.replace(/<\/ul>/gi, '\n');
-  text = text.replace(/<ol[^>]*>/gi, '\n');
-  text = text.replace(/<\/ol>/gi, '\n');
-  text = text.replace(/<li[^>]*>(.*?)<\/li>/gi, '- $1\n');
-
-  // 转换段落和换行
-  text = text.replace(/<br\s*\/?>/gi, '\n');
-  text = text.replace(/<\/p>/gi, '\n\n');
-  text = text.replace(/<p[^>]*>/gi, '');
-
-  // 移除剩余的HTML标签
-  text = text.replace(/<[^>]+>/g, '');
-
-  // 解码HTML实体
-  text = text.replace(/&nbsp;/g, ' ');
-  text = text.replace(/&lt;/g, '<');
-  text = text.replace(/&gt;/g, '>');
-  text = text.replace(/&amp;/g, '&');
-  text = text.replace(/&quot;/g, '"');
-
-  // 清理多余空白
-  text = text.replace(/\n\s*\n\s*\n/g, '\n\n');
-  text = text.trim();
-
-  return text;
-}
-
-/**
  * 创建富文本内容
  */
 function createRichContent(html: string): RichContent {
+  // 清理HTML以防止XSS攻击
+  const sanitizedHtml = DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: [
+      'p', 'br', 'strong', 'b', 'em', 'i', 'u', 'strike',
+      'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+      'a', 'span'
+    ],
+    ALLOWED_ATTR: ['href'], // 移除style属性以提高安全性
+    FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed'],
+    FORBID_ATTR: ['onload', 'onclick', 'onerror', 'onmouseover']
+  });
+
   return {
-    html,
+    html: sanitizedHtml,
     plainText: htmlToPlainText(html),
-    markdown: htmlToMarkdown(html)
+    markdown: '' // 暂不支持Markdown格式
   };
 }
 
@@ -170,7 +133,7 @@ function createHeaderBlock(data: ResumeData): HeaderBlock {
   // 转换自定义链接
   const links: Link[] = customLinks.map(link => ({
     text: link.text,
-    url: link.type === 'link' ? link.url : undefined
+    url: link.type === 'link' ? validateAndSanitizeUrl(link.url) || undefined : undefined
   }));
 
   return {
@@ -275,21 +238,3 @@ export function transformResumeDataToDocument(data: ResumeData): ResumeDocument 
   };
 }
 
-/**
- * 格式化日期范围为字符串
- */
-export function formatDateRange(dateRange: DateRange | undefined, format: 'YYYY-MM' | 'YYYY/MM' | 'YYYY.MM' = 'YYYY-MM'): string {
-  if (!dateRange || !dateRange.start) return '';
-
-  const separator = format === 'YYYY-MM' ? '-' : format === 'YYYY/MM' ? '/' : '.';
-
-  const formatDate = (dateStr: string) => {
-    const [year, month] = dateStr.split('-');
-    return `${year}${separator}${month}`;
-  };
-
-  const start = formatDate(dateRange.start);
-  const end = dateRange.isCurrent ? '至今' : (dateRange.end ? formatDate(dateRange.end) : '');
-
-  return `${start} - ${end}`;
-}

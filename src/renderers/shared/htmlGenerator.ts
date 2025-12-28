@@ -3,6 +3,7 @@
  * 使用纯字符串拼接生成HTML，确保预览和PDF输出完全一致
  */
 
+import DOMPurify from 'dompurify';
 import type {
 	ResumeDocument,
 	DocumentBlock,
@@ -10,11 +11,24 @@ import type {
 	SectionBlock,
 	ListBlock,
 	SectionItem,
-	DateRange,
 	RenderOptions,
 } from "../../types/document";
 import { resumeStyles } from "../../types/styles";
-import type { ResumeStyle } from "../../types/styles";
+import type { StyleConfig } from "../../types/styles";
+import { formatDateRange } from "../../utils/dateUtils";
+
+/**
+ * HTML转义工具函数
+ */
+function escapeHtml(text: string): string {
+	if (!text) return '';
+	return text
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#39;');
+}
 
 /**
  * 生成完整文档的HTML
@@ -31,7 +45,22 @@ export function generateDocumentHTML(
 	});
 
 	html += "</div>";
-	return html;
+
+	// 清理HTML以防止XSS攻击
+	return DOMPurify.sanitize(html, {
+		ALLOWED_TAGS: [
+			'div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+			'strong', 'b', 'em', 'i', 'u', 'strike', 'br',
+			'ul', 'ol', 'li',
+			'a',
+			'img'
+		],
+		ALLOWED_ATTR: [
+			'style', 'href', 'src', 'alt', 'title'
+		],
+		FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed'],
+		FORBID_ATTR: ['onload', 'onclick', 'onerror', 'onmouseover']
+	});
 }
 
 /**
@@ -40,7 +69,7 @@ export function generateDocumentHTML(
 export function generateBlockHTML(
 	block: DocumentBlock,
 	options: RenderOptions,
-	style: ResumeStyle
+	style: StyleConfig
 ): string {
 	switch (block.type) {
 		case "header":
@@ -62,7 +91,7 @@ export function generateBlockHTML(
 export function generateHeaderHTML(
 	block: HeaderBlock,
 	options: RenderOptions,
-	style: ResumeStyle
+	style: StyleConfig
 ): string {
 	let html =
 		'<div style="margin-bottom: 20px; page-break-inside: avoid;">';
@@ -81,7 +110,7 @@ export function generateHeaderHTML(
 	// 姓名
 	html += `<h1 style="font-size: 22px; font-weight: bold; color: ${
 		style.colors.primary
-	}; margin: 0 0 6px 0; page-break-after: avoid;">${block.name || "姓名"}</h1>`;
+	}; margin: 0 0 6px 0; page-break-after: avoid;">${escapeHtml(block.name || "姓名")}</h1>`;
 
 	// 元数据(联系方式)
 	html +=
@@ -90,7 +119,7 @@ export function generateHeaderHTML(
 		';">';
 	block.metadata.forEach((meta) => {
 		const icon = getMetadataIcon(meta.label);
-		html += `<span style="display: flex; align-items: center; gap: 4px;">${icon}${meta.value}</span>`;
+		html += `<span style="display: flex; align-items: center; gap: 4px;">${icon}${escapeHtml(meta.value)}</span>`;
 	});
 	html += "</div></div></div>";
 
@@ -100,9 +129,9 @@ export function generateHeaderHTML(
 			'<div style="margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 12px;">';
 		block.links.forEach((link) => {
 			if (link.url) {
-				html += `<a href="${link.url}" style="font-size: 13px; color: ${style.colors.primary}; text-decoration: none; display: flex; align-items: center; gap: 4px;">🔗 ${link.text}</a>`;
+				html += `<a href="${escapeHtml(link.url)}" style="font-size: 13px; color: ${style.colors.primary}; text-decoration: none; display: flex; align-items: center; gap: 4px;">🔗 ${escapeHtml(link.text)}</a>`;
 			} else {
-				html += `<span style="font-size: 13px; color: ${style.colors.secondary};">${link.text}</span>`;
+				html += `<span style="font-size: 13px; color: ${style.colors.secondary};">${escapeHtml(link.text)}</span>`;
 			}
 		});
 		html += "</div>";
@@ -113,10 +142,10 @@ export function generateHeaderHTML(
 		html += `<div style="margin-bottom: 12px; padding: 12px; background-color: ${style.colors.accent}; border-radius: 6px; page-break-inside: avoid;">`;
 		html += '<div style="display: flex; gap: 24px;">';
 		if (block.jobIntention.position) {
-			html += `<div><span style="font-size: 13px; color: ${style.colors.secondary};">求职职位:</span><span style="margin-left: 8px; font-weight: bold; font-size: 13px;">${block.jobIntention.position}</span></div>`;
+			html += `<div><span style="font-size: 13px; color: ${style.colors.secondary};">求职职位:</span><span style="margin-left: 8px; font-weight: bold; font-size: 13px;">${escapeHtml(block.jobIntention.position)}</span></div>`;
 		}
 		if (block.jobIntention.salary) {
-			html += `<div><span style="font-size: 13px; color: ${style.colors.secondary};">期望薪资:</span><span style="margin-left: 8px; font-weight: bold; font-size: 13px;">${block.jobIntention.salary}</span></div>`;
+			html += `<div><span style="font-size: 13px; color: ${style.colors.secondary};">期望薪资:</span><span style="margin-left: 8px; font-weight: bold; font-size: 13px;">${escapeHtml(block.jobIntention.salary)}</span></div>`;
 		}
 		html += "</div></div>";
 	}
@@ -134,7 +163,7 @@ export function generateHeaderHTML(
 export function generateSectionHTML(
 	block: SectionBlock,
 	options: RenderOptions,
-	style: ResumeStyle
+	style: StyleConfig
 ): string {
 	if (block.items.length === 0) return "";
 
@@ -153,7 +182,7 @@ export function generateSectionHTML(
 	if (options.showIcons && block.icon) {
 		html += `<span>${block.icon}</span>`;
 	}
-	html += `${block.title}</h2>`;
+	html += `${escapeHtml(block.title)}</h2>`;
 
 	// 章节内容
 	if (block.displayMode === "tag") {
@@ -162,9 +191,9 @@ export function generateSectionHTML(
 			'<div style="display: flex; flex-wrap: wrap; gap: 8px; padding-left: 16px;">';
 		block.items.forEach((item) => {
 			const content = item.content?.plainText
-				? `: ${item.content.plainText}`
+				? `: ${escapeHtml(item.content.plainText)}`
 				: "";
-			html += `<span style="padding: 4px 12px; background-color: ${style.colors.accent}; color: ${style.colors.text}; border-radius: 16px; font-size: 14px;">${item.title}${content}</span>`;
+			html += `<span style="padding: 4px 12px; background-color: ${style.colors.accent}; color: ${style.colors.text}; border-radius: 16px; font-size: 14px;">${escapeHtml(item.title)}${content}</span>`;
 		});
 		html += "</div>";
 	} else {
@@ -186,7 +215,7 @@ export function generateSectionHTML(
 export function generateSectionItemHTML(
 	item: SectionItem,
 	options: RenderOptions,
-	style: ResumeStyle
+	style: StyleConfig
 ): string {
 	let html =
 		'<div class="section-item" style="padding-left: 12px; page-break-inside: avoid; break-inside: avoid;">';
@@ -194,9 +223,9 @@ export function generateSectionItemHTML(
 	// 标题和日期
 	html +=
 		'<div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 2px;">';
-	html += `<h3 style="font-size: 15px; font-weight: bold; color: ${style.colors.text}; margin: 0; page-break-after: avoid; break-after: avoid;">${item.title}`;
+	html += `<h3 style="font-size: 15px; font-weight: bold; color: ${style.colors.text}; margin: 0; page-break-after: avoid; break-after: avoid;">${escapeHtml(item.title)}`;
 	if (item.subtitle) {
-		html += `<span style="font-weight: normal; margin-left: 8px;">${item.subtitle}</span>`;
+		html += `<span style="font-weight: normal; margin-left: 8px;">${escapeHtml(item.subtitle)}</span>`;
 	}
 	html += "</h3>";
 
@@ -209,7 +238,7 @@ export function generateSectionItemHTML(
 
 	// 位置
 	if (item.location) {
-		html += `<p style="font-size: 14px; color: ${style.colors.secondary}; margin: 4px 0;">📍 ${item.location}</p>`;
+		html += `<p style="font-size: 14px; color: ${style.colors.secondary}; margin: 4px 0;">📍 ${escapeHtml(item.location)}</p>`;
 	}
 
 	// 内容
@@ -227,7 +256,7 @@ export function generateSectionItemHTML(
 export function generateListHTML(
 	block: ListBlock,
 	_options: RenderOptions,
-	style: ResumeStyle
+	style: StyleConfig
 ): string {
 	if (block.items.length === 0) return "";
 
@@ -243,13 +272,13 @@ export function generateListHTML(
 	// 列表标题
 	html += `<h2 style="font-size: 16px; font-weight: bold; color: ${style.colors.primary}; margin: 0 0 8px 0; display: flex; align-items: center; gap: 8px;">`;
 	html += `<span style="width: 4px; height: 18px; background-color: ${style.colors.primary}; border-radius: 2px;"></span>`;
-	html += `${block.title}</h2>`;
+	html += `${escapeHtml(block.title)}</h2>`;
 
 	// 列表项
 	html +=
 		'<div style="display: flex; flex-wrap: wrap; gap: 6px; padding-left: 12px;">';
 	block.items.forEach((item) => {
-		html += `<span style="padding: 3px 10px; background-color: ${style.colors.accent}; color: ${style.colors.text}; border-radius: 12px; font-size: 13px;">${item}</span>`;
+		html += `<span style="padding: 3px 10px; background-color: ${style.colors.accent}; color: ${style.colors.text}; border-radius: 12px; font-size: 13px;">${escapeHtml(item)}</span>`;
 	});
 	html += "</div>";
 
@@ -260,7 +289,7 @@ export function generateListHTML(
 /**
  * 生成分隔线的HTML
  */
-export function generateDividerHTML(style: ResumeStyle): string {
+export function generateDividerHTML(style: StyleConfig): string {
 	return `<div style="border-bottom: 1px solid ${style.colors.accent}; margin: 16px 0;"></div>`;
 }
 
@@ -277,29 +306,3 @@ export function getMetadataIcon(label: string): string {
 	return "";
 }
 
-/**
- * 格式化日期范围
- */
-export function formatDateRange(
-	dateRange: DateRange,
-	format: string = "YYYY-MM"
-): string {
-	if (!dateRange || !dateRange.start) return "";
-
-	const separator =
-		format === "YYYY-MM" ? "-" : format === "YYYY/MM" ? "/" : ".";
-
-	const formatDate = (dateStr: string) => {
-		const [year, month] = dateStr.split("-");
-		return `${year}${separator}${month}`;
-	};
-
-	const start = formatDate(dateRange.start);
-	const end = dateRange.isCurrent
-		? "至今"
-		: dateRange.end
-		? formatDate(dateRange.end)
-		: "";
-
-	return `${start} - ${end}`;
-}

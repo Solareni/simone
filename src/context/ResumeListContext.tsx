@@ -1,9 +1,9 @@
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import type { ReactNode } from 'react';
 import type { ResumeData, ResumeListItem } from '../types/resume';
 import { initialResumeData } from '../data/initialResume';
-
-const STORAGE_KEY = 'resume-list';
-const RESUME_DATA_PREFIX = 'resume-data-';
+import { safeLocalStorageGet, safeLocalStorageSet, safeLocalStorageRemove, getStorageErrorMessage } from '../utils/storageUtils';
+import { STORAGE_KEYS } from '../constants';
 
 interface ResumeListContextType {
   resumes: ResumeListItem[];
@@ -13,6 +13,8 @@ interface ResumeListContextType {
   saveResumeData: (id: string, data: ResumeData) => void;
   currentResumeId: string | null;
   setCurrentResumeId: (id: string | null) => void;
+  storageError: string | null;
+  clearStorageError: () => void;
 }
 
 const ResumeListContext = createContext<ResumeListContextType | undefined>(undefined);
@@ -20,10 +22,16 @@ const ResumeListContext = createContext<ResumeListContextType | undefined>(undef
 export function ResumeListProvider({ children }: { children: ReactNode }) {
   const [resumes, setResumes] = useState<ResumeListItem[]>([]);
   const [currentResumeId, setCurrentResumeId] = useState<string | null>(null);
+  const [storageError, setStorageError] = useState<string | null>(null);
+
+  // 清除存储错误
+  const clearStorageError = useCallback(() => {
+    setStorageError(null);
+  }, []);
 
   // 从 localStorage 加载简历列表
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = safeLocalStorageGet(STORAGE_KEYS.RESUME_LIST);
     if (stored) {
       try {
         const parsed = JSON.parse(stored) as ResumeListItem[];
@@ -37,8 +45,12 @@ export function ResumeListProvider({ children }: { children: ReactNode }) {
 
   // 保存简历列表到 localStorage
   const saveResumeList = useCallback((list: ResumeListItem[]) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-    setResumes(list);
+    const success = safeLocalStorageSet(STORAGE_KEYS.RESUME_LIST, JSON.stringify(list));
+    if (success) {
+      setResumes(list);
+    } else {
+      setStorageError(getStorageErrorMessage());
+    }
   }, []);
 
   // 创建新简历
@@ -62,7 +74,11 @@ export function ResumeListProvider({ children }: { children: ReactNode }) {
     };
 
     // 保存简历数据
-    localStorage.setItem(RESUME_DATA_PREFIX + id, JSON.stringify(newResumeData));
+    const dataSaved = safeLocalStorageSet(STORAGE_KEYS.RESUME_DATA_PREFIX + id, JSON.stringify(newResumeData));
+    if (!dataSaved) {
+      setStorageError(getStorageErrorMessage());
+      return id; // 仍然返回ID，但标记错误
+    }
 
     // 更新简历列表
     const newList = [newResumeListItem, ...resumes];
@@ -74,7 +90,7 @@ export function ResumeListProvider({ children }: { children: ReactNode }) {
   // 删除简历
   const deleteResume = (id: string) => {
     // 删除简历数据
-    localStorage.removeItem(RESUME_DATA_PREFIX + id);
+    const dataRemoved = safeLocalStorageRemove(STORAGE_KEYS.RESUME_DATA_PREFIX + id);
 
     // 更新简历列表
     const newList = resumes.filter(r => r.id !== id);
@@ -84,16 +100,21 @@ export function ResumeListProvider({ children }: { children: ReactNode }) {
     if (currentResumeId === id) {
       setCurrentResumeId(null);
     }
+
+    if (!dataRemoved) {
+      setStorageError('删除简历数据时出现问题，但简历列表已更新');
+    }
   };
 
   // 获取简历数据
   const getResumeData = (id: string): ResumeData | null => {
-    const stored = localStorage.getItem(RESUME_DATA_PREFIX + id);
+    const stored = safeLocalStorageGet(STORAGE_KEYS.RESUME_DATA_PREFIX + id);
     if (stored) {
       try {
         return JSON.parse(stored) as ResumeData;
       } catch (e) {
         console.error('Failed to parse resume data:', e);
+        setStorageError('简历数据格式错误，无法加载');
         return null;
       }
     }
@@ -110,7 +131,11 @@ export function ResumeListProvider({ children }: { children: ReactNode }) {
     };
 
     // 保存简历数据
-    localStorage.setItem(RESUME_DATA_PREFIX + id, JSON.stringify(updatedData));
+    const success = safeLocalStorageSet(STORAGE_KEYS.RESUME_DATA_PREFIX + id, JSON.stringify(updatedData));
+    if (!success) {
+      setStorageError(getStorageErrorMessage());
+      return;
+    }
 
     // 更新简历列表中的标题和预览
     setResumes(prevResumes => {
@@ -128,7 +153,7 @@ export function ResumeListProvider({ children }: { children: ReactNode }) {
         }
         return r;
       });
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newList));
+      safeLocalStorageSet(STORAGE_KEYS.RESUME_LIST, JSON.stringify(newList));
       return newList;
     });
   }, []);
@@ -143,6 +168,8 @@ export function ResumeListProvider({ children }: { children: ReactNode }) {
         saveResumeData,
         currentResumeId,
         setCurrentResumeId,
+        storageError,
+        clearStorageError,
       }}
     >
       {children}
