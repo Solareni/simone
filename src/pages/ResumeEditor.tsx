@@ -4,7 +4,6 @@ import PreviewPanel from '../components/PreviewPanel/PreviewPanel';
 import { useResumeListStore } from '../stores/resumeListStore';
 import { useResumeStore } from '../stores/resumeStore';
 import { useTranslation } from 'react-i18next';
-import LanguageSwitcher from '../components/LanguageSwitcher';
 
 export default function ResumeEditor() {
   const { t } = useTranslation();
@@ -29,11 +28,6 @@ export default function ResumeEditor() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* 语言切换器 */}
-      <div className="fixed top-4 right-4 z-50">
-        <LanguageSwitcher />
-      </div>
-
       {/* 返回首页按钮 */}
       <div className="fixed top-4 left-4 z-50">
         <button
