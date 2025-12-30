@@ -7,7 +7,7 @@ import html2canvas from "html2canvas";
 import type { ResumeDocument, RenderOptions } from "../types/document";
 import { resumeStyles } from "../types/styles";
 import { generateDocumentHTML } from "./shared/htmlGenerator";
-import { A4_WIDTH_PX, PNG_EXPORT_DEFAULTS } from "../constants";
+import { A4_WIDTH_PX, A4_HEIGHT_PX, PNG_EXPORT_DEFAULTS } from "../constants";
 
 /**
  * PNG导出选项
@@ -28,6 +28,7 @@ export interface PNGExportOptions extends RenderOptions {
 /**
  * 生成用于PNG导出的HTML容器
  * 这个容器会被转换为PNG，需要设置合适的尺寸
+ * 使用固定A4尺寸（单页）
  */
 function createPNGContainer(
 	resumeDoc: ResumeDocument,
@@ -37,11 +38,13 @@ function createPNGContainer(
 
 	// A4尺寸换算为像素（96 DPI）
 	const width = options.width || A4_WIDTH_PX;
+	const height = A4_HEIGHT_PX;
 
 	// 创建容器元素
 	const container = window.document.createElement("div");
 	container.style.width = `${width}px`;
-	container.style.padding = "40px"; // 页边距
+	container.style.height = `${height}px`; // 固定A4高度
+	container.style.padding = "24px"; // 页边距，与预览一致
 	container.style.backgroundColor = options.backgroundColor || style.colors.background;
 	container.style.color = style.colors.text;
 	container.style.fontFamily =
@@ -49,6 +52,7 @@ function createPNGContainer(
 	container.style.fontSize = "14px";
 	container.style.lineHeight = "1.5";
 	container.style.boxSizing = "border-box";
+	container.style.overflow = "hidden"; // 确保内容不溢出
 
 	// 构建HTML内容
 	container.innerHTML = generateDocumentHTML(resumeDoc, options);

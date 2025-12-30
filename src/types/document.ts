@@ -176,11 +176,19 @@ export interface ResumeDocument {
  */
 export interface RenderOptions {
   /** 样式主题 */
-  style?: 'modern' | 'classic' | 'minimal' | 'professional';
+  style?: 'modern' | 'professional';
   /** 是否包含头像 */
   includeAvatar?: boolean;
   /** 日期格式 */
   dateFormat?: 'YYYY-MM' | 'YYYY/MM' | 'YYYY.MM';
   /** 是否显示图标 */
   showIcons?: boolean;
+  /** 自定义颜色（覆盖风格默认颜色） */
+  customColors?: {
+    primary: string;
+    secondary: string;
+    text: string;
+    background: string;
+    accent: string;
+  };
 }

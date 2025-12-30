@@ -1,12 +1,13 @@
 import { useResumeStore } from '../../stores/resumeStore';
 import { useStyleStore } from '../../stores/styleStore';
+import { useThemeStore } from '../../stores/themeStore';
 import { resumeStyles } from '../../types/styles';
+import { themes } from '../../types/theme';
 import { transformResumeDataToDocument } from '../../transformers/documentTransformer';
 import { DocumentRenderer } from '../../renderers/htmlRenderer';
 import StyleSwitcher from './StyleSwitcher';
 import { exportToPDF, exportToPNG } from '../../utils/export';
-import { useRef, useEffect, useState, useMemo, useCallback } from 'react';
-import { A4_HEIGHT_PX } from '../../constants';
+import { useRef, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 /**
@@ -18,66 +19,27 @@ export default function PreviewPanel() {
   const { t } = useTranslation();
   const data = useResumeStore((state) => state.data);
   const currentStyle = useStyleStore((state) => state.currentStyle);
-  const style = resumeStyles[currentStyle];
+  const currentTheme = useThemeStore((state) => state.currentTheme);
+
+  // 合并风格和主题：使用风格的布局和字体，但使用主题的颜色
+  const style = {
+    ...resumeStyles[currentStyle],
+    colors: themes[currentTheme].colors
+  };
+
   const contentRef = useRef<HTMLDivElement>(null);
-  const [pageBreaks, setPageBreaks] = useState<number[]>([]);
   const [exportStatus, setExportStatus] = useState<ExportStatus>('idle');
   const [exportError, setExportError] = useState<string | null>(null);
 
-  // A4纸张高度常量
-
   // 转换为文档模型（使用useMemo避免重复转换）
   const document = useMemo(() => transformResumeDataToDocument(data), [data]);
-
-  // 计算页面分隔线的函数
-  const calculatePageBreaks = useCallback(() => {
-    if (contentRef.current) {
-      const contentHeight = contentRef.current.scrollHeight;
-      const breaks: number[] = [];
-
-      // 计算需要几个分隔线
-      const numPages = Math.ceil(contentHeight / A4_HEIGHT_PX);
-      for (let i = 1; i < numPages; i++) {
-        breaks.push(i * A4_HEIGHT_PX);
-      }
-
-      // 使用函数式更新，避免依赖pageBreaks
-      setPageBreaks((prevBreaks) => {
-        // 只在breaks真的变化时才更新（避免无限循环）
-        const breaksChanged =
-          breaks.length !== prevBreaks.length ||
-          breaks.some((val, idx) => val !== prevBreaks[idx]);
-
-        return breaksChanged ? breaks : prevBreaks;
-      });
-    }
-  }, []);
-
-  // 使用ResizeObserver监听内容高度变化
-  useEffect(() => {
-    const contentElement = contentRef.current;
-    if (!contentElement) return;
-
-    // 初始计算
-    calculatePageBreaks();
-
-    // 创建ResizeObserver
-    const resizeObserver = new ResizeObserver(() => {
-      calculatePageBreaks();
-    });
-
-    resizeObserver.observe(contentElement);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [calculatePageBreaks]);
 
   const handleExportPDF = async () => {
     setExportStatus('exporting-pdf');
     setExportError(null);
     try {
-      await exportToPDF(data, currentStyle);
+      // 传递完整的样式配置（包含主题颜色）
+      await exportToPDF(data, style);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : t('preview.exportError');
       setExportError(`PDF ${errorMessage}`);
@@ -90,7 +52,8 @@ export default function PreviewPanel() {
     setExportStatus('exporting-png');
     setExportError(null);
     try {
-      await exportToPNG(data, currentStyle);
+      // 传递完整的样式配置（包含主题颜色）
+      await exportToPNG(data, style);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : t('preview.exportError');
       setExportError(`PNG ${errorMessage}`);
@@ -149,56 +112,35 @@ export default function PreviewPanel() {
       )}
 
       {/* 预览区域 */}
-      <div className="flex items-start justify-center flex-1 overflow-auto">
-        {/* 页面分隔线容器 */}
-        <div className="relative">
-          {/* 页面分隔线 - 动态计算位置 */}
-          {pageBreaks.map((breakPosition, index) => (
-            <div
-              key={index}
-              className="absolute left-0 right-0 pointer-events-none"
-              style={{
-                top: `${breakPosition}px`,
-                zIndex: 10
-              }}
-            >
-              {/* 虚线 */}
-              <div className="border-t-2 border-dashed border-blue-400 opacity-60" />
-              {/* 页码标识 */}
-              <div className="absolute -top-3 right-0 bg-blue-100 px-3 py-1 rounded-full text-xs text-blue-700 font-medium shadow-sm">
-                {t('preview.page', { page: index + 2 })}
-              </div>
-            </div>
-          ))}
-
-          {/* A4 纸张效果 */}
-          <div
-            ref={contentRef}
-            data-resume-content
-            className="bg-white shadow-xl rounded-lg w-full max-w-[210mm] min-h-[297mm] p-8 lg:p-12 print:shadow-none print:rounded-none"
-            style={{
-              color: style.colors.text,
-              backgroundColor: style.colors.background
+      <div className="flex items-start justify-center flex-1 overflow-auto p-4">
+        {/* A4 纸张效果 - 自适应高度，支持多页内容 */}
+        <div
+          ref={contentRef}
+          data-resume-content
+          className="bg-white shadow-xl rounded-lg w-[210mm] min-h-[297mm] p-6 print:shadow-none print:rounded-none"
+          style={{
+            color: style.colors.text,
+            backgroundColor: style.colors.background
+          }}
+        >
+          {/* 使用文档模型渲染器 */}
+          <DocumentRenderer
+            document={document}
+            options={{
+              style: currentStyle,
+              includeAvatar: true,
+              showIcons: false,
+              dateFormat: 'YYYY-MM',
+              customColors: style.colors
             }}
-          >
-            {/* 使用文档模型渲染器 */}
-            <DocumentRenderer
-              document={document}
-              options={{
-                style: currentStyle,
-                includeAvatar: true,
-                showIcons: false,
-                dateFormat: 'YYYY-MM'
-              }}
-            />
+          />
 
-            {/* 如果没有任何内容，显示提示 */}
-            {!hasContent && (
-              <div className="flex items-center justify-center h-64 text-gray-400">
-                <p>{t('preview.emptyPreview')}</p>
-              </div>
-            )}
-          </div>
+          {/* 如果没有任何内容，显示提示 */}
+          {!hasContent && (
+            <div className="flex items-center justify-center h-64 text-gray-400">
+              <p>{t('preview.emptyPreview')}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

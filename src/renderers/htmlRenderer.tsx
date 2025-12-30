@@ -24,6 +24,9 @@ interface HTMLRendererProps {
 export function DocumentRenderer({ document, options = {} }: HTMLRendererProps) {
   const style = resumeStyles[options.style || 'modern'];
 
+  // 使用自定义颜色或默认颜色
+  const colors = options.customColors || style.colors;
+
   // 使用共享的HTML生成函数
   const html = generateDocumentHTML(document, options);
 
@@ -34,8 +37,8 @@ export function DocumentRenderer({ document, options = {} }: HTMLRendererProps) 
     <div
       className="resume-content"
       style={{
-        color: style.colors.text,
-        backgroundColor: style.colors.background
+        color: colors.text,
+        backgroundColor: colors.background
       }}
       dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
     />

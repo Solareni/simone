@@ -7,7 +7,7 @@ import html2pdf from "html2pdf.js";
 import type { ResumeDocument, RenderOptions } from "../types/document";
 import { resumeStyles } from "../types/styles";
 import { generateDocumentHTML } from "./shared/htmlGenerator";
-import { A4_WIDTH_MM, A4_SCALE_FACTOR, PDF_EXPORT_DEFAULTS } from "../constants";
+import { A4_WIDTH_MM, A4_HEIGHT_MM, A4_SCALE_FACTOR, PDF_EXPORT_DEFAULTS } from "../constants";
 
 /**
  * PDF导出选项
@@ -21,27 +21,39 @@ export interface PDFExportOptions extends RenderOptions {
 	includePageNumbers?: boolean;
 	/** PDF质量 (0-1) */
 	quality?: number;
+	/** 自定义颜色（覆盖风格颜色） */
+	customColors?: {
+		primary: string;
+		secondary: string;
+		text: string;
+		background: string;
+		accent: string;
+	};
 }
 
 /**
  * 生成用于PDF导出的HTML容器
  * 这个容器会被转换为PDF,所以需要严格按照A4尺寸设置
+ * 使用固定A4尺寸（单页）
  */
 function createPDFContainer(
 	resumeDoc: ResumeDocument,
 	options: PDFExportOptions
 ): HTMLDivElement {
 	const style = resumeStyles[options.style || "modern"];
+	// 如果提供了自定义颜色，使用自定义颜色
+	const colors = options.customColors || style.colors;
 
 	// 创建容器元素
 	const container = window.document.createElement("div");
-	// 容器占满整个A4宽度
+	// 容器占满整个A4尺寸
 	container.style.width = `${A4_WIDTH_MM}mm`;
-	// 添加内边距，让内容更紧凑且与预览一致
-	container.style.padding = "10mm";
+	container.style.height = `${A4_HEIGHT_MM}mm`; // 固定A4高度
+	// 添加内边距，与预览一致
+	container.style.padding = "6mm";
 	container.style.boxSizing = "border-box";
-	container.style.backgroundColor = style.colors.background;
-	container.style.color = style.colors.text;
+	container.style.backgroundColor = colors.background;
+	container.style.color = colors.text;
 	container.style.fontFamily =
 		'-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
 	container.style.fontSize = "12px";
@@ -49,8 +61,11 @@ function createPDFContainer(
 	// 设置overflow确保内容不会溢出
 	container.style.overflow = "hidden";
 
-	// 构建HTML内容
-	container.innerHTML = generateDocumentHTML(resumeDoc, options);
+	// 构建HTML内容（传递自定义颜色）
+	container.innerHTML = generateDocumentHTML(resumeDoc, {
+		...options,
+		customColors: colors
+	});
 
 	return container;
 }

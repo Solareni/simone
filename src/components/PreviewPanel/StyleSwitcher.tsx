@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { useStyleStore } from '../../stores/styleStore';
+import { useThemeStore } from '../../stores/themeStore';
 import { resumeStyles } from '../../types/styles';
+import { themes } from '../../types/theme';
 import type { ResumeStyle } from '../../types/styles';
+import type { ThemeId } from '../../types/theme';
 import { useTranslation } from 'react-i18next';
 
 type ExportStatus = 'idle' | 'exporting-pdf' | 'exporting-png';
@@ -16,20 +19,28 @@ export default function StyleSwitcher({ onExportPDF, onExportPNG, exportStatus =
   const { t } = useTranslation();
   const currentStyle = useStyleStore((state) => state.currentStyle);
   const setStyle = useStyleStore((state) => state.setStyle);
+  const currentTheme = useThemeStore((state) => state.currentTheme);
+  const setTheme = useThemeStore((state) => state.setTheme);
+
   const [isStyleMenuOpen, setIsStyleMenuOpen] = useState(false);
+  const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
 
   const isExporting = exportStatus !== 'idle';
   const isExportingPDF = exportStatus === 'exporting-pdf';
   const isExportingPNG = exportStatus === 'exporting-png';
 
+  // 获取当前主题颜色用于显示
+  const currentThemeColors = themes[currentTheme].colors;
+
   return (
     <div className="flex gap-3 print:hidden">
-      {/* 样式选择下拉菜单 */}
+      {/* 布局选择下拉菜单 */}
       <div className="relative">
         <button
           onClick={() => {
             setIsStyleMenuOpen(!isStyleMenuOpen);
+            setIsThemeMenuOpen(false);
             setIsExportMenuOpen(false);
           }}
           className="px-4 py-2.5 bg-white rounded-lg shadow-md hover:shadow-lg transition-all flex items-center gap-2 text-sm font-medium text-gray-700 border border-gray-200"
@@ -72,6 +83,72 @@ export default function StyleSwitcher({ onExportPDF, onExportPNG, exportStatus =
                       <div className="text-xs text-gray-500">{style.description}</div>
                     </div>
                     {currentStyle === styleId && (
+                      <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* 主题选择下拉菜单 */}
+      <div className="relative">
+        <button
+          onClick={() => {
+            setIsThemeMenuOpen(!isThemeMenuOpen);
+            setIsStyleMenuOpen(false);
+            setIsExportMenuOpen(false);
+          }}
+          className="px-4 py-2.5 bg-white rounded-lg shadow-md hover:shadow-lg transition-all flex items-center gap-2 text-sm font-medium text-gray-700 border border-gray-200"
+        >
+          <div
+            className="w-4 h-4 rounded-full border-2 border-gray-300"
+            style={{ backgroundColor: currentThemeColors.primary }}
+          />
+          <span>{themes[currentTheme].name}</span>
+          <svg
+            className={`w-4 h-4 transition-transform ${isThemeMenuOpen ? 'rotate-180' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        {isThemeMenuOpen && (
+          <>
+            <div
+              className="fixed inset-0 z-10"
+              onClick={() => setIsThemeMenuOpen(false)}
+            />
+            <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl z-20 overflow-hidden border border-gray-200">
+              {(Object.keys(themes) as ThemeId[]).map((themeId) => {
+                const theme = themes[themeId];
+                return (
+                  <button
+                    key={themeId}
+                    onClick={() => {
+                      setTheme(themeId);
+                      setIsThemeMenuOpen(false);
+                    }}
+                    className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-center gap-3 text-sm ${
+                      currentTheme === themeId ? 'bg-blue-50 text-blue-600' : ''
+                    }`}
+                  >
+                    <div
+                      className="w-6 h-6 rounded-full border-2 border-gray-300 flex-shrink-0"
+                      style={{ backgroundColor: theme.colors.primary }}
+                    />
+                    <div className="flex-1">
+                      <div className="font-medium">{theme.name}</div>
+                      <div className="text-xs text-gray-500">{theme.description}</div>
+                    </div>
+                    {currentTheme === themeId && (
                       <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
