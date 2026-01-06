@@ -77,3 +77,4 @@ export const UI_CONFIG = {
   DEBOUNCE_DELAY: 300,
   TOAST_DURATION: 5000,
 } as const;
+
