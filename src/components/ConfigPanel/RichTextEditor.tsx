@@ -70,7 +70,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
         quillRef.current.off('text-change', handleTextChange);
         
         // 清理 toolbar
-        const toolbarModule = quillRef.current.getModule('toolbar');
+        const toolbarModule = quillRef.current.getModule('toolbar') as any;
         if (toolbarModule && toolbarModule.container) {
           toolbarModule.container.remove();
         }

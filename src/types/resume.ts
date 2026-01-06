@@ -38,7 +38,7 @@ export interface CustomSection {
 export interface CustomLink {
   id: string;
   text: string;
-  url: string;
+  url?: string;
   type: 'link' | 'text';
 }
 

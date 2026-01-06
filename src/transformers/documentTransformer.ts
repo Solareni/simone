@@ -133,7 +133,7 @@ function createHeaderBlock(data: ResumeData): HeaderBlock {
   // 转换自定义链接
   const links: Link[] = customLinks.map(link => ({
     text: link.text,
-    url: link.type === 'link' ? validateAndSanitizeUrl(link.url) || undefined : undefined
+    url: link.type === 'link' && link.url ? validateAndSanitizeUrl(link.url) || undefined : undefined
   }));
 
   return {

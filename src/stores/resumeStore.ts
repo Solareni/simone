@@ -30,7 +30,7 @@ interface ResumeState {
 
 export const useResumeStore = create<ResumeState>()(
   devtools(
-    subscribeWithSelector((set, get) => ({
+    subscribeWithSelector((set) => ({
       data: initialResumeData,
       resumeId: null,
 
