@@ -1,0 +1,14 @@
+# robots.txt for Simone
+
+User-agent: *
+Allow: /
+
+# Disallow specific paths if any
+# Disallow: /api/
+# Disallow: /private/
+
+# Sitemap location
+Sitemap: https://simone.mfasta.com/sitemap.xml
+
+# Crawl delay (optional)
+# Crawl-delay: 1
